@@ -1,0 +1,6 @@
+weave
+openai
+groq
+together
+requests
+python-dotenv
