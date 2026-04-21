@@ -63,7 +63,14 @@ Stay tuned for exciting discoveries and dental AI breakthroughs!
 
 ## 📊 Evaluation Results
 
-(You can add a brief summary of your findings here, or link to a more detailed results page)
+This is an ongoing exploration rather than a finished benchmark. Current status:
+
+- **Providers compared:** OpenRouter, Groq, Together, OctoAI, Novita, DeepInfra, Fireworks — all running LLaMA 3.1 70B.
+- **What's been tested:** baseline dental Q&A prompts and a small RAG evaluation notebook (`rag_evaluation_test.ipynb`) against a curated dental article set (`articles.json` / `article_index.faiss`).
+- **What's tracked:** per-provider latency, output consistency for identical prompts, and qualitative accuracy on dental terminology — all logged via Weights & Biases.
+- **What's still missing:** a formal scoring rubric validated by clinicians, a larger dental QA test set, and side-by-side comparison with GPT-4-class models.
+
+Findings will be written up once the rubric and test set are in place. If you're working on dental LLM evaluation and want to compare notes, get in touch.
 
 ## 🛠️ Tools Used
 
