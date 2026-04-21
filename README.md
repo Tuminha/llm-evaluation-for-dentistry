@@ -39,16 +39,15 @@ The evaluation focuses on three axes that matter clinically:
 2. **Output consistency** — identical prompt, same model, different host or different run: how much does the answer drift.
 3. **Latency** — time-to-first-token and total completion time per provider, logged per call.
 
-## Evaluation Results
+## Status — updated 2026-04-21
 
-This is an ongoing exploration rather than a finished benchmark. Current status:
+**Phase 1 — complete.** Provider latency and consistency matrix across 7 LLaMA 3.1 70B hosts (OpenRouter, Groq, Together, OctoAI, Novita, DeepInfra, Fireworks). Every run is logged to Weights & Biases with prompt, response, latency, and host metadata.
 
-- **Providers compared:** OpenRouter, Groq, Together, OctoAI, Novita, DeepInfra, Fireworks — all running LLaMA 3.1 70B.
-- **What's been tested:** baseline dental Q&A prompts and a small RAG evaluation notebook (`rag_evaluation_test.ipynb`) against a curated dental article set (`articles.json` / `article_index.faiss`).
-- **What's tracked:** per-provider latency, output consistency for identical prompts, and qualitative accuracy on dental terminology — all logged via Weights & Biases.
-- **What's still missing:** a formal scoring rubric validated by clinicians, a larger dental QA test set, and side-by-side comparison with GPT-4-class models.
+**Phase 2 — in progress.** Clinician-validated scoring rubric plus an expanded dental QA test set. Goal: turn the Phase 1 matrix into a publishable benchmark instead of a developer-facing scratchpad.
 
-Findings will be written up once the rubric and test set are in place. If you're working on dental LLM evaluation and want to compare notes, open an issue or get in touch.
+**Phase 3 — planned.** Side-by-side comparison against GPT-4-class and Claude-class models on the Phase 2 test set, with per-domain scoring (anatomy, diagnosis, treatment planning, patient communication).
+
+If you're working on dental LLM evaluation and want to compare notes, open an issue or reach out.
 
 ## Tools used
 
