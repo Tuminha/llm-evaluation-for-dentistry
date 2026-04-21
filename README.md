@@ -1,67 +1,45 @@
-# 🦷 LLM Evaluation for Dentistry: The Quest for the Perfect Dental AI 🧠
+# LLM Evaluation for Dentistry
 
-Welcome to my exciting journey in the world of Language Models and Dentistry! This repository is part of my quest to find the perfect LLM that knows everything about dentistry, a crucial component of the Periospot AI project.
+A benchmarking harness for comparing Large Language Model providers on dental knowledge tasks. Part of the [Periospot AI](https://periospot.com) project.
 
-## 🎯 Project Overview
+## Why this exists
 
-This project focuses on evaluating various Large Language Models (LLMs), specifically different implementations of LLaMA 3.1 70B, to determine their effectiveness in understanding and generating dental knowledge. It's a fun and intriguing exploration into the intersection of artificial intelligence and dentistry.
+When an LLM is used to answer clinical questions — "what's the evidence for immediate loading of single implants in the posterior maxilla?" — provider choice matters. Same model name (e.g. LLaMA 3.1 70B), same prompt, different host, different latency, different factual consistency. This repo is the harness for measuring those differences on dental content instead of guessing.
 
-### 🧪 What's Inside
+## What's in the repo
 
-This repository contains:
+| File | Purpose |
+|---|---|
+| `run_evals.ipynb` | Runs dental-domain prompts across multiple LLaMA 3.1 70B hosts (OpenRouter, Groq, Together, OctoAI, Novita, DeepInfra, Fireworks) and logs results to Weights & Biases. |
+| `rag_evaluation_test.ipynb` | Small RAG evaluation over a curated set of dental articles (`articles.json` + `article_index.faiss`) using OpenAI embeddings and Groq generation. |
+| `articles.json` / `article_index.faiss` | Curated dental article corpus and its FAISS index, used as the RAG retrieval source. |
 
-1. `rag_evaluation_test.ipynb`: A Jupyter notebook for testing Retrieval-Augmented Generation (RAG) using OpenAI and Groq APIs.
-2. `run_evals.ipynb`: A notebook for running evaluations on different LLaMA 3.1 70B implementations across various providers.
-3. Custom evaluation metrics and prompts tailored for dental scenarios.
+## Getting started
 
-## 🚀 Getting Started
+```bash
+git clone https://github.com/Tuminha/llm-evaluation-for-dentistry.git
+cd llm-evaluation-for-dentistry
+pip install -r requirements.txt
+cp .env.example .env
+```
 
-To dive into this dental AI adventure:
+Then add the API keys you actually want to benchmark (you don't need all of them):
 
-1. Clone this repository
-2. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Set up environment variables:
-   Copy the `.env.example` file to a new file named `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-   Then, open the `.env` file and add your API keys:
-   - Add your Weights & Biases API key to `WANDB_API_KEY`
-   - Add your OpenRouter API key to `OPENROUTER_API_KEY`
-   - Add your Groq API key to `GROQ_API_KEY`
-   - Add your Together API key to `TOGETHER_API_KEY`
-   - Add your OpenAI API key to `OPENAI_API_KEY`
-4. Run the Jupyter notebooks to see the evaluations in action
+- `WANDB_API_KEY` — experiment tracking
+- `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `TOGETHER_API_KEY` — provider access
+- `OPENAI_API_KEY` — embeddings for the RAG notebook
 
-## 🦷 Why Dentistry and AI?
+Open the notebooks in Jupyter or VS Code and run top-to-bottom.
 
-Dentistry is a complex field with vast amounts of specialized knowledge. By leveraging the power of LLMs, we aim to create an AI assistant that can:
+## What's being measured
 
-- Assist dental professionals in diagnosis and treatment planning
-- Provide instant access to up-to-date dental research
-- Help patients understand complex dental procedures
+The evaluation focuses on three axes that matter clinically:
 
-## 🧠 The Quest for the Perfect Dental LLM
+1. **Factual accuracy on dental terminology** — does the model get the anatomy, diagnoses, and treatment steps right, or does it hallucinate plausibly.
+2. **Output consistency** — identical prompt, same model, different host or different run: how much does the answer drift.
+3. **Latency** — time-to-first-token and total completion time per provider, logged per call.
 
-Our journey involves:
-
-1. Evaluating LLaMA 3.1 70B implementations from various providers:
-   - OctoAI
-   - Novita
-   - DeepInfra
-   - Fireworks
-   - Groq
-   - Together
-2. Creating dental-specific prompts and test cases
-3. Analyzing model performance on dental terminology and concepts
-4. Comparing the performance of different LLaMA 3.1 70B implementations
-
-Stay tuned for exciting discoveries and dental AI breakthroughs!
-
-## 📊 Evaluation Results
+## Evaluation Results
 
 This is an ongoing exploration rather than a finished benchmark. Current status:
 
@@ -70,36 +48,24 @@ This is an ongoing exploration rather than a finished benchmark. Current status:
 - **What's tracked:** per-provider latency, output consistency for identical prompts, and qualitative accuracy on dental terminology — all logged via Weights & Biases.
 - **What's still missing:** a formal scoring rubric validated by clinicians, a larger dental QA test set, and side-by-side comparison with GPT-4-class models.
 
-Findings will be written up once the rubric and test set are in place. If you're working on dental LLM evaluation and want to compare notes, get in touch.
+Findings will be written up once the rubric and test set are in place. If you're working on dental LLM evaluation and want to compare notes, open an issue or get in touch.
 
-## 🛠️ Tools Used
+## Tools used
 
-- Weights & Biases for experiment tracking and visualization
-- Python for scripting and data processing
-- Jupyter Notebooks for interactive development
-- OpenAI API for embeddings and baseline comparisons
-- OpenRouter API for accessing various LLaMA 3.1 70B implementations
-- Groq API for fast inference
-- Together API for additional LLaMA 3.1 70B implementation
+- **Weights & Biases** — experiment tracking, per-run metrics, side-by-side comparisons
+- **FAISS** — vector index for the RAG corpus
+- **OpenAI API** — embeddings + baseline completions
+- **Groq / Together / OpenRouter** — LLaMA 3.1 70B provider access
+- **Python + Jupyter** — notebook-driven experimentation
 
-## 🙏 Acknowledgements
+## License
 
-A huge thank you to the dental community for their expertise and to the AI researchers pushing the boundaries of what's possible with language models. Special thanks to the teams behind LLaMA, OpenAI, Groq, Together, and all the providers offering LLaMA 3.1 70B implementations.
+[MIT](LICENSE).
 
-## 📝 License
+## Contact
 
-This project is open source and available under the [MIT License](LICENSE).
+Francisco Teixeira Barbosa — periodontist, founder of [Periospot](https://periospot.com), Executive Director at the [Foundation for Oral Rehabilitation](https://www.for.org).
 
-## 📬 Contact
-
-If you're as excited about the intersection of AI and dentistry as I am, let's connect!
-
-### Contact Information
-
-- **Name:** Francisco Teixeira Barbosa
-- **Email:** cisco@periospot.com
-- **Personal Portfolio:** [https://franciscodds.framer.ai/](https://franciscodds.framer.ai/)
-- **GitHub:** [https://github.com/Tuminha](https://github.com/Tuminha)
-- **Twitter/X:** [@Cisco_research](https://x.com/Cisco_research)
-
-Let's revolutionize dentistry with AI! 🦷🤖
+- Email: cisco@periospot.com
+- GitHub: [@Tuminha](https://github.com/Tuminha)
+- X: [@Cisco_research](https://x.com/Cisco_research)
