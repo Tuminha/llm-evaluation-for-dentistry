@@ -1,6 +1,18 @@
+# Core
 weave
 openai
 groq
 together
 requests
 python-dotenv
+set-env-colab-kaggle-dotenv  # set_env helper used by run_evals.ipynb (drop after Phase 2 refactor)
+
+# RAG notebook
+faiss-cpu
+numpy
+nest_asyncio
+
+# Notebook environment
+jupyter
+ipywidgets
+tqdm
