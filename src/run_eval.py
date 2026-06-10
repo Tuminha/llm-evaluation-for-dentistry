@@ -123,11 +123,22 @@ def run(args) -> None:
     RESULTS_DIR.mkdir(exist_ok=True)
     raw_path = RESULTS_DIR / "results.jsonl"
     rows: list[dict] = []
+    done: set[tuple[str, str]] = set()
+    if raw_path.exists():  # resume: keep already-finished (model, question) results
+        for line in raw_path.read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                rows.append(r)
+                done.add((r["model"], r["qid"]))
+        if done:
+            print(f"Resuming — {len(done)} model-question results already on disk")
 
-    with raw_path.open("w") as raw:
+    with raw_path.open("a") as raw:  # append so an interrupted run preserves progress
         for model in models:
             print(f"\n=== {model.label} ({model.id}) ===")
             for q in questions:
+                if (model.label, q["id"]) in done:
+                    continue
                 answers, latencies = [], []
                 for t in range(trials):
                     out = client.complete(model.id, q["question"])
@@ -152,6 +163,7 @@ def run(args) -> None:
                 }
                 rows.append(row)
                 raw.write(json.dumps(row) + "\n")
+                raw.flush()  # durable per result — survives a laptop sleep / kill
                 mark = "✓" if row["correct"] else "✗"
                 print(f"  {mark} {q['id']:9s} {row['mean_latency_s']}s  {q['domain']}")
 
