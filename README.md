@@ -79,16 +79,17 @@ python src/run_eval.py --smoke
 # Full cross-provider run — 3 trials for consistency, log to Weights & Biases
 python src/run_eval.py --trials 3 --wandb
 
-# Claude-family pilot using only an ANTHROPIC_API_KEY (no OpenRouter needed)
-python src/run_eval.py --backend anthropic --trials 3
+# Single-provider pilots using only that provider's key (no OpenRouter needed)
+python src/run_eval.py --backend anthropic --trials 3   # Claude family
+python src/run_eval.py --backend openai --trials 3       # GPT family (incl. GPT-5.5)
 
 # Custom lineup (keys from src/providers.py ROSTER)
 python src/run_eval.py --models claude-opus-4.8,gpt-5.2,gemini-3.1-pro,llama-4-maverick
 ```
 
-Two backends: `--backend openrouter` (default) reaches every provider through one key;
-`--backend anthropic` runs the Claude family directly with an Anthropic key — useful for a
-first pilot before wiring up OpenRouter.
+Three backends: `--backend openrouter` (default) reaches every provider through one key;
+`--backend anthropic` and `--backend openai` run a single provider's family directly with
+that provider's key — useful for a first pilot before wiring up OpenRouter.
 
 You don't need an API key to regenerate the dataset chart:
 

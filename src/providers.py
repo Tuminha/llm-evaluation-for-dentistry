@@ -58,6 +58,15 @@ CLAUDE_ROSTER: dict[str, Model] = {
 }
 CLAUDE_LINEUP = ["opus-4.8", "sonnet-4.6", "haiku-4.5"]
 
+# Native OpenAI backend (uses OPENAI_API_KEY directly). Native IDs verified on the
+# OpenAI models list 2026-06-10; GPT-5.5 is the current frontier model.
+OPENAI_ROSTER: dict[str, Model] = {
+    "gpt-5.5":      Model("gpt-5.5",      "GPT-5.5",      "flagship"),
+    "gpt-5.4-mini": Model("gpt-5.4-mini", "GPT-5.4 mini", "efficient"),
+    "gpt-5.4-nano": Model("gpt-5.4-nano", "GPT-5.4 nano", "efficient"),
+}
+OPENAI_LINEUP = ["gpt-5.5", "gpt-5.4-mini", "gpt-5.4-nano"]
+
 
 class OpenRouterClient:
     """Minimal chat-completions client with per-call latency measurement."""
@@ -134,6 +143,47 @@ class AnthropicClient:
             )
             latency = time.perf_counter() - start
             text = next((b.text for b in msg.content if b.type == "text"), "")
+            return {"text": text, "latency_s": round(latency, 3), "ok": True, "error": None}
+        except Exception as e:  # noqa: BLE001
+            return {
+                "text": None,
+                "latency_s": round(time.perf_counter() - start, 3),
+                "ok": False,
+                "error": str(e),
+            }
+
+
+class OpenAIClient:
+    """Native OpenAI Chat Completions client (official SDK), same .complete() shape.
+
+    Reaches OpenAI models only. Uses ``max_completion_tokens`` (GPT-5.x replaced
+    ``max_tokens``) and does NOT send ``temperature`` — GPT-5.x reasoning models
+    reject non-default temperature. The token budget is generous because reasoning
+    tokens count against it.
+    """
+
+    def __init__(self, api_key: str | None = None, max_tokens: int = 3000, timeout: int = 120):
+        from openai import OpenAI  # imported lazily so other backends need no SDK
+
+        key = api_key or os.environ.get("OPENAI_API_KEY")
+        if not key:
+            raise RuntimeError(
+                "OPENAI_API_KEY not set. Add it to .env (or your shell) before "
+                "running with --backend openai."
+            )
+        self.client = OpenAI(api_key=key, timeout=timeout)
+        self.max_tokens = max_tokens
+
+    def complete(self, model_id: str, prompt: str, temperature: float | None = None) -> dict:
+        start = time.perf_counter()
+        try:
+            resp = self.client.chat.completions.create(
+                model=model_id,
+                messages=[{"role": "user", "content": prompt}],
+                max_completion_tokens=self.max_tokens,
+            )
+            latency = time.perf_counter() - start
+            text = resp.choices[0].message.content or ""
             return {"text": text, "latency_s": round(latency, 3), "ok": True, "error": None}
         except Exception as e:  # noqa: BLE001
             return {

@@ -3,6 +3,7 @@ requests
 python-dotenv
 matplotlib
 anthropic        # native Claude backend (src/run_eval.py --backend anthropic)
+openai           # native OpenAI/GPT backend (src/run_eval.py --backend openai)
 
 # Optional: experiment tracking (src/run_eval.py --wandb)
 wandb

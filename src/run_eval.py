@@ -31,11 +31,21 @@ from providers import (  # noqa: E402
     CLAUDE_LINEUP,
     CLAUDE_ROSTER,
     DEFAULT_LINEUP,
+    OPENAI_LINEUP,
+    OPENAI_ROSTER,
     ROSTER,
     AnthropicClient,
+    OpenAIClient,
     OpenRouterClient,
 )
 from scorers import consistency_score, judge_answer  # noqa: E402
+
+# Per-backend: (roster, default lineup, key env var, client class, default judge key)
+BACKENDS = {
+    "openrouter": (ROSTER, DEFAULT_LINEUP, "OPENROUTER_API_KEY", OpenRouterClient, "claude-opus-4.8"),
+    "anthropic": (CLAUDE_ROSTER, CLAUDE_LINEUP, "ANTHROPIC_API_KEY", AnthropicClient, "opus-4.8"),
+    "openai": (OPENAI_ROSTER, OPENAI_LINEUP, "OPENAI_API_KEY", OpenAIClient, "gpt-5.5"),
+}
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data" / "dental_qa.json"
@@ -79,24 +89,13 @@ def _ensure_key(var: str) -> str | None:
 
 
 def run(args) -> None:
-    if args.backend == "anthropic":
-        roster, default_lineup = CLAUDE_ROSTER, CLAUDE_LINEUP
-        src = _ensure_key("ANTHROPIC_API_KEY")
-        if not src:
-            sys.exit("No ANTHROPIC_API_KEY found (checked env, repo .env, ~/.env.periospot). "
-                     "Add it to .env and retry.")
-        print(f"Backend: anthropic (key from {src})")
-        client = AnthropicClient()
-        default_judge = "opus-4.8"
-    else:
-        roster, default_lineup = ROSTER, DEFAULT_LINEUP
-        src = _ensure_key("OPENROUTER_API_KEY")
-        if not src:
-            sys.exit("No OPENROUTER_API_KEY found (checked env, repo .env, ~/.env.periospot). "
-                     "Add it to .env and retry.")
-        print(f"Backend: openrouter (key from {src})")
-        client = OpenRouterClient()
-        default_judge = "claude-opus-4.8"
+    roster, default_lineup, key_var, client_cls, default_judge = BACKENDS[args.backend]
+    src = _ensure_key(key_var)
+    if not src:
+        sys.exit(f"No {key_var} found (checked env, repo .env, ~/.env.periospot). "
+                 "Add it to .env and retry.")
+    print(f"Backend: {args.backend} (key from {src})")
+    client = client_cls()
 
     lineup_keys = args.models.split(",") if args.models else default_lineup
     unknown = [k for k in lineup_keys if k not in roster]
@@ -216,8 +215,8 @@ def write_summary(summary: dict, rows: list[dict]) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Run the Periospot dental LLM benchmark.")
-    p.add_argument("--backend", choices=["openrouter", "anthropic"], default="openrouter",
-                   help="openrouter = all providers (one key); anthropic = Claude family via your Anthropic key")
+    p.add_argument("--backend", choices=list(BACKENDS), default="openrouter",
+                   help="openrouter = all providers (one key); anthropic = Claude family; openai = GPT family")
     p.add_argument("--models", help="comma-separated roster keys (default: backend's default lineup)")
     p.add_argument("--judge", help="roster key or raw model id for the judge (default: a flagship)")
     p.add_argument("--trials", type=int, default=3, help="trials per question (consistency)")
