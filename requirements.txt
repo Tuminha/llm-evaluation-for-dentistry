@@ -1,18 +1,11 @@
-# Core
-weave
-openai
-groq
-together
+# Benchmark harness (src/)
 requests
 python-dotenv
-set-env-colab-kaggle-dotenv  # set_env helper used by run_evals.ipynb (drop after Phase 2 refactor)
+matplotlib
 
-# RAG notebook
-faiss-cpu
-numpy
-nest_asyncio
+# Optional: experiment tracking (src/run_eval.py --wandb)
+wandb
+weave
 
-# Notebook environment
-jupyter
-ipywidgets
-tqdm
+# Legacy W&B course notebooks (legacy/) also use:
+#   openai groq together faiss-cpu numpy nest_asyncio set-env-colab-kaggle-dotenv

@@ -1,61 +1,138 @@
-# LLM Evaluation for Dentistry
+# Which LLMs can a dentist trust?
 
-A benchmarking harness for comparing Large Language Model providers on dental knowledge tasks. Part of the [Periospot AI](https://periospot.com) project.
+A reproducible benchmark that measures how well current large language models answer
+**clinical dental questions** — across periodontics, implants, oral-systemic medicine,
+pharmacology, and patient communication. Part of the [Periospot](https://periospot.com) project.
+
+![Benchmark pipeline](assets/pipeline.svg)
 
 ## Why this exists
 
-When an LLM is used to answer clinical questions — "what's the evidence for immediate loading of single implants in the posterior maxilla?" — provider choice matters. Same model name (e.g. LLaMA 3.1 70B), same prompt, different host, different latency, different factual consistency. This repo is the harness for measuring those differences on dental content instead of guessing.
+LLMs are already being used to answer clinical questions — "what stage of periodontitis
+is this?", "can I extract a tooth on a patient taking apixaban?". The models disagree,
+and a fluent wrong answer is dangerous in a clinical context. Most public LLM benchmarks
+test math, coding, and trivia; almost none test **dental knowledge against the actual
+guidelines** (2017 World Workshop classification, EFP S3 treatment guideline, AAOMS MRONJ,
+AHA/NICE prophylaxis).
 
-## What's in the repo
+This repo is that missing benchmark: a periodontist-authored question set with explicit
+scoring rubrics, run across every major model through a single gateway, scored the same way
+every time.
 
-| File | Purpose |
-|---|---|
-| `run_evals.ipynb` | Runs dental-domain prompts across multiple LLaMA 3.1 70B hosts (OpenRouter, Groq, Together, OctoAI, Novita, DeepInfra, Fireworks) and logs results to Weights & Biases. |
-| `rag_evaluation_test.ipynb` | Small RAG evaluation over a curated set of dental articles (`articles.json` + `article_index.faiss`) using OpenAI embeddings and Groq generation. |
-| `articles.json` / `article_index.faiss` | Curated dental article corpus and its FAISS index, used as the RAG retrieval source. |
+## The dataset
 
-## Getting started
+30 questions across 6 clinical domains, each with a difficulty level and a rubric that
+defines what a correct answer must include — and the errors it must avoid.
+
+![Dataset composition](assets/dataset_composition.png)
+
+Each question looks like this:
+
+```json
+{
+  "id": "pharm-03",
+  "domain": "pharmacology",
+  "difficulty": "advanced",
+  "question": "How should a routine dental extraction be managed in a patient taking warfarin, and in a patient taking a DOAC?",
+  "rubric": {
+    "must_include": ["Do NOT routinely stop anticoagulation without medical consultation",
+                     "Warfarin: check a recent INR and proceed with local haemostatic measures if within range",
+                     "..."],
+    "must_avoid": ["Advising the dentist to unilaterally stop warfarin or DOAC for a simple extraction"]
+  }
+}
+```
+
+> **Status: DRAFT (v0.1.0).** The rubrics are grounded in mainstream guidelines but have
+> not yet been clinician-signed-off. They must be validated by a periodontist before any
+> results are published. See [`data/dental_qa.json`](data/dental_qa.json).
+
+## How scoring works
+
+1. **Generation** — every model answers every question through [OpenRouter](https://openrouter.ai)
+   (one API key reaches all of them, and the network path is identical, so latency is comparable).
+2. **Judging** — an LLM judge grades each answer against the question's rubric: it counts how
+   many `must_include` criteria are satisfied and flags any `must_avoid` violations. An answer
+   is correct only if it satisfies **all** required criteria and commits **no** violations.
+3. **Consistency** — each question is asked N times; we measure how much the answers drift.
+4. **Latency** — wall-clock time per call is recorded for every request.
+
+The judge is configurable (`--judge`). Note the usual caveat: an LLM judge can show mild
+self-preference, so the judge model is reported alongside results and can be swapped.
+
+## Quickstart
 
 ```bash
 git clone https://github.com/Tuminha/llm-evaluation-for-dentistry.git
 cd llm-evaluation-for-dentistry
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
+cp .env.example .env          # then add your OPENROUTER_API_KEY
 ```
 
-Then add the API keys you actually want to benchmark (you don't need all of them):
+```bash
+# Cheap sanity check — 3 questions, 1 trial, default lineup
+python src/run_eval.py --smoke
 
-- `WANDB_API_KEY` — experiment tracking
-- `OPENROUTER_API_KEY`, `GROQ_API_KEY`, `TOGETHER_API_KEY` — provider access
-- `OPENAI_API_KEY` — embeddings for the RAG notebook
+# Full run — 3 trials for consistency, log to Weights & Biases
+python src/run_eval.py --trials 3 --wandb
 
-Open the notebooks in Jupyter or VS Code and run top-to-bottom.
+# Custom lineup (keys from src/providers.py ROSTER)
+python src/run_eval.py --models claude-opus-4.8,gpt-5.2,gemini-3.1-pro,llama-4-maverick
+```
 
-## What's being measured
+You don't need an API key to regenerate the dataset chart:
 
-The evaluation focuses on three axes that matter clinically:
+```bash
+python src/build_visuals.py
+```
 
-1. **Factual accuracy on dental terminology** — does the model get the anatomy, diagnoses, and treatment steps right, or does it hallucinate plausibly.
-2. **Output consistency** — identical prompt, same model, different host or different run: how much does the answer drift.
-3. **Latency** — time-to-first-token and total completion time per provider, logged per call.
+## The model lineup
 
-## Status — updated 2026-04-21
+Verified available on OpenRouter (2026-06-10). Spanning closed flagships, efficient tiers,
+and open-weight models:
 
-**Phase 1 — complete.** Provider latency and consistency matrix across 7 LLaMA 3.1 70B hosts (OpenRouter, Groq, Together, OctoAI, Novita, DeepInfra, Fireworks). Every run is logged to Weights & Biases with prompt, response, latency, and host metadata.
+| Tier | Models |
+|---|---|
+| Flagship | Claude Opus 4.8, GPT-5.2, Gemini 3.1 Pro |
+| Efficient | Claude Haiku 4.5, GPT-5 mini, Gemini 2.5 Flash |
+| Open-weight | Llama 4 Maverick, DeepSeek V3.2 |
 
-**Phase 2 — in progress.** Clinician-validated scoring rubric plus an expanded dental QA test set. Goal: turn the Phase 1 matrix into a publishable benchmark instead of a developer-facing scratchpad.
+Edit `ROSTER` in [`src/providers.py`](src/providers.py) to add or swap models.
 
-**Phase 3 — planned.** Side-by-side comparison against GPT-4-class and Claude-class models on the Phase 2 test set, with per-domain scoring (anatomy, diagnosis, treatment planning, patient communication).
+## Results
 
-If you're working on dental LLM evaluation and want to compare notes, open an issue or reach out.
+> **No numbers are published here yet** — the dataset rubrics are still pending clinical
+> validation, so a published leaderboard would be premature. This is deliberate: the previous
+> version of this README claimed completed results with no data behind them.
 
-## Tools used
+Once the dataset is signed off, `python src/run_eval.py --trials 3` produces, in `results/`:
 
-- **Weights & Biases** — experiment tracking, per-run metrics, side-by-side comparisons
-- **FAISS** — vector index for the RAG corpus
-- **OpenAI API** — embeddings + baseline completions
-- **Groq / Together / OpenRouter** — LLaMA 3.1 70B provider access
-- **Python + Jupyter** — notebook-driven experimentation
+- `summary.md` — accuracy + latency leaderboard, plus a model × clinical-domain table
+- `accuracy_by_model.png` — accuracy ranked by model, coloured by tier
+- `accuracy_by_domain.png` — a model × domain accuracy heatmap (where each model is strong/weak)
+- `results.jsonl` — the full per-answer record, including the judge's reasoning
+
+The results section of this README will then embed those charts — generated from real runs only.
+
+## Repo layout
+
+```
+data/dental_qa.json     # the benchmark dataset (draft)
+src/providers.py        # model roster + OpenRouter client
+src/scorers.py          # LLM-judge + consistency scoring
+src/run_eval.py         # CLI runner -> results/ + charts
+src/build_visuals.py    # charts (dataset chart needs no API key)
+assets/                 # committed README visuals
+legacy/                 # original W&B Weave course notebooks (provenance)
+```
+
+## Roadmap
+
+- **Now** — clinician validation of the 30-question draft set; first real run; publish results.
+- **Next** — expand to ~75–100 questions; add a second independent judge; per-difficulty breakdowns.
+- **Later** — publish the validated dataset to Hugging Face under Periospot; quarterly re-runs as
+  models change; a Periospot write-up of the findings.
 
 ## License
 
@@ -63,7 +140,8 @@ If you're working on dental LLM evaluation and want to compare notes, open an is
 
 ## Contact
 
-Francisco Teixeira Barbosa — periodontist, founder of [Periospot](https://periospot.com), Executive Director at the [Foundation for Oral Rehabilitation](https://www.for.org).
+Francisco Teixeira Barbosa — periodontist, founder of [Periospot](https://periospot.com),
+Executive Director at the [Foundation for Oral Rehabilitation](https://www.for.org).
 
 - Email: cisco@periospot.com
 - GitHub: [@Tuminha](https://github.com/Tuminha)
