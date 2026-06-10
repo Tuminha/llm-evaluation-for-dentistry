@@ -1,10 +1,14 @@
-# Which LLMs can a dentist trust?
+![Which LLMs can a dentist trust?](assets/hero.svg)
+
+![License: MIT](https://img.shields.io/badge/License-MIT-3FB6B2.svg)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3FB6B2.svg)
+![Backends](https://img.shields.io/badge/backends-OpenRouter%20%C2%B7%20OpenAI%20%C2%B7%20Anthropic-9A7DDE.svg)
+![Rubrics](https://img.shields.io/badge/rubrics-guideline%20verified-E0A458.svg)
+![Tracking](https://img.shields.io/badge/tracking-Weights%20%26%20Biases-E0A458.svg)
 
 A reproducible benchmark that measures how well current large language models answer
 **clinical dental questions** — across periodontics, implants, oral-systemic medicine,
 pharmacology, and patient communication. Part of the [Periospot](https://periospot.com) project.
-
-![Benchmark pipeline](assets/pipeline.svg)
 
 ## Why this exists
 
@@ -50,6 +54,8 @@ Each question looks like this:
 > [`VALIDATION.md`](VALIDATION.md). Dataset: [`data/dental_qa.json`](data/dental_qa.json).
 
 ## How scoring works
+
+![Benchmark pipeline](assets/pipeline.svg)
 
 1. **Generation** — every model answers every question through [OpenRouter](https://openrouter.ai)
    (one API key reaches all of them, and the network path is identical, so latency is comparable).
@@ -145,6 +151,35 @@ legacy/                 # original W&B Weave course notebooks (provenance)
 - **Next** — expand to ~75–100 questions; add a second independent judge; per-difficulty breakdowns.
 - **Later** — publish the validated dataset to Hugging Face under Periospot; quarterly re-runs as
   models change; a Periospot write-up of the findings.
+
+## Contributing
+
+The two highest-value contributions:
+
+- **Add a question.** Append an entry to [`data/dental_qa.json`](data/dental_qa.json) with a
+  clinician-written `must_include` / `must_avoid` rubric and a guideline source. New clinical
+  claims should be verifiable against a current guideline (see [`VALIDATION.md`](VALIDATION.md)
+  for the bar).
+- **Add or swap a model.** Add an entry to a roster in [`src/providers.py`](src/providers.py)
+  — `ROSTER` (OpenRouter), `CLAUDE_ROSTER`, or `OPENAI_ROSTER` — then run with `--models`.
+
+Open an issue first if you're proposing a scoring or methodology change.
+
+## How to cite
+
+If you use this benchmark or dataset, please cite it:
+
+```bibtex
+@misc{teixeirabarbosa_dental_llm_benchmark_2026,
+  author = {Teixeira Barbosa, Francisco},
+  title  = {Periospot Dental LLM Benchmark: clinical dental knowledge evaluation for language models},
+  year   = {2026},
+  url    = {https://github.com/Tuminha/llm-evaluation-for-dentistry}
+}
+```
+
+A machine-readable [`CITATION.cff`](CITATION.cff) is included, so GitHub renders a
+"Cite this repository" button automatically.
 
 ## License
 

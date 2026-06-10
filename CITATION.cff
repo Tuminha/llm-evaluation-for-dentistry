@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this benchmark or dataset, please cite it as below."
+title: "Periospot Dental LLM Benchmark"
+abstract: >-
+  A reproducible benchmark measuring how well language models answer clinical
+  dental questions across periodontics, implants, oral-systemic medicine,
+  pharmacology, and patient communication, using clinician-written, guideline-
+  verified scoring rubrics.
+type: dataset
+authors:
+  - family-names: "Teixeira Barbosa"
+    given-names: "Francisco"
+    affiliation: "Periospot; Foundation for Oral Rehabilitation"
+    orcid: ""
+keywords:
+  - dentistry
+  - periodontics
+  - large language models
+  - LLM evaluation
+  - benchmark
+  - clinical decision support
+license: MIT
+repository-code: "https://github.com/Tuminha/llm-evaluation-for-dentistry"
+url: "https://periospot.com"
+version: "0.1.1-draft"
+date-released: "2026-06-10"
