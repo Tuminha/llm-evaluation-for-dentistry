@@ -1,10 +1,10 @@
 {
   "metadata": {
     "name": "Periospot Dental LLM Benchmark",
-    "version": "0.1.1-draft",
+    "version": "0.1.2",
     "created": "2026-06-10",
-    "status": "DRAFT — guideline-verified; pending final clinician sign-off on flagged items (see VALIDATION.md)",
-    "validation_note": "Rubrics encode accepted answers grounded in mainstream guidelines (2017 World Workshop classification, EFP S3 2020 treatment guideline, AAOMS MRONJ 2022, AHA 2021 / NICE / SDCEP 2022, Cochrane 2022). On 2026-06-10 the 10 most factual claims were verified against primary guideline sources: 9 confirmed, sys-01 corrected (HbA1c ~0.4%), txt-04 and impl-03 wording tightened. Remaining sign-off items for Francisco Teixeira Barbosa (periodontist): pharm-02 AHA-vs-NICE jurisdiction, diag-02 Stage III/IV boundary. Full per-claim record with sources in VALIDATION.md.",
+    "status": "Clinician-reviewed (guideline-verified). All flagged items resolved 2026-06-10 — see VALIDATION.md.",
+    "validation_note": "Rubrics encode accepted answers grounded in mainstream guidelines (2017 World Workshop classification, EFP S3 2020 treatment guideline, AAOMS MRONJ 2022, AHA 2021 / NICE / SDCEP 2022, Cochrane 2022). The 10 most factual claims were verified against primary guideline sources (9 confirmed; sys-01 HbA1c corrected to ~0.4%; txt-04 and impl-03 tightened). Flagged items then resolved on Francisco Teixeira Barbosa's (periodontist) delegation: pharm-02 made jurisdiction-aware (AHA vs NICE both acceptable; clindamycin removed per AHA 2021), diag-02 Stage III/IV guard confirmed adequate, and the 20 conceptual/communication rubrics reviewed for overstatement (none found). Full per-claim record in VALIDATION.md.",
     "scoring": "Each question is scored by an LLM judge against its rubric criteria. A response is 'correct' only if it satisfies the must_include criteria and commits none of the must_avoid errors.",
     "domains": ["perio_diagnosis", "perio_treatment", "implants_periimplantitis", "oral_systemic", "pharmacology", "patient_communication"],
     "reference_frameworks": [
@@ -400,13 +400,16 @@
       "question": "Under current AHA/NICE-aligned guidance, which patients need antibiotic prophylaxis before invasive dental procedures, and what is a typical regimen?",
       "rubric": {
         "must_include": [
-          "Prophylaxis is reserved for the highest-risk cardiac conditions (e.g., prosthetic heart valve or prosthetic material for valve repair, previous infective endocarditis, certain unrepaired/repaired congenital heart disease, cardiac transplant with valvulopathy)",
+          "Under the AHA framework, prophylaxis is reserved for the highest-risk cardiac conditions (e.g., prosthetic heart valve or prosthetic material for valve repair, previous infective endocarditis, certain unrepaired/repaired congenital heart disease, cardiac transplant with valvulopathy)",
+          "Acknowledges the jurisdictional difference: AHA (US) recommends prophylaxis for those highest-risk groups, whereas NICE (UK) does not recommend antibiotic prophylaxis routinely — either position is acceptable if correctly attributed",
           "Indicated for procedures involving manipulation of gingival tissue or periapical region or perforation of oral mucosa",
-          "Typical regimen amoxicillin 2 g orally 30–60 minutes before the procedure (with an alternative such as clindamycin or azithromycin/cephalexin for penicillin allergy, noting clindamycin is now often avoided)"
+          "Typical regimen amoxicillin 2 g orally 30–60 minutes before the procedure (with an alternative such as azithromycin/clarithromycin or cephalexin for penicillin allergy)"
         ],
         "must_avoid": [
           "Recommending prophylaxis for all patients with any heart murmur or joint replacement routinely",
-          "Giving an incorrect amoxicillin dose"
+          "Giving an incorrect amoxicillin dose",
+          "Presenting one jurisdiction's position as universal, or treating the NICE 'not recommended routinely' stance as wrong",
+          "Recommending clindamycin as the standard penicillin-allergy alternative (AHA removed it in 2021 due to C. difficile and adverse-event risk)"
         ]
       },
       "key_references": ["AHA 2007/updates; NICE CG64"]

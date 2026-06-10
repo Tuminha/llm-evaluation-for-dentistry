@@ -27,29 +27,29 @@ source-checked — they are lower-risk and have no specific numbers to get wrong
 | txt-03 — EFP against routine adjunctive systemic antibiotics (AMR) | Confirmed | EFP S3, Sanz et al. 2020 | None |
 | impl-03 — keratinized mucosa ≥2 mm | Confirmed (scope) | SRs incl. Tavelli/Barootchi 2023; EAO consensus | **Rubric scoped** — ≥2 mm benefit is for plaque/inflammation/recession/comfort, **not** implant survival or marginal bone level |
 
-## Sign-off items still needing Francisco's clinical judgement
+## Flagged items — RESOLVED 2026-06-10
 
-These are wording/scope calls, not factual errors — left for you to confirm:
+The three items below were closed on Francisco Teixeira Barbosa's (periodontist) delegation.
 
-1. **pharm-02 (jurisdiction).** The rubric is AHA-flavoured (amoxicillin 2 g, prophylaxis
-   for highest-risk cardiac groups). NICE (UK) is stricter — "antibiotic prophylaxis is
-   not recommended routinely." Decide whether a NICE-correct UK answer should score as
-   correct, or whether the item is explicitly AHA-scoped. (AHA 2021 also dropped
-   clindamycin as the penicillin-allergy alternative — the rubric already hedges this.)
-2. **diag-02 (Stage III vs IV boundary).** The worked case is correctly Stage III, but
-   CAL ≥5 mm spans both Stage III and Stage IV — the distinction is bone-loss extent
-   (mid- vs apical-third) plus complexity factors (≥5 teeth lost to periodontitis,
-   masticatory dysfunction, etc.). The rubric's `must_avoid` already guards against
-   premature Stage IV; confirm you're happy with that guard.
-3. **General.** The 20 rubrics not source-checked here (communication items, conceptual
-   treatment/implant/oral-systemic items) — skim for anything you'd phrase differently.
+1. **pharm-02 (jurisdiction) — fixed.** The rubric is now jurisdiction-aware: a correct
+   **AHA** answer (prophylaxis for highest-risk cardiac groups) and a correct **NICE** answer
+   ("not recommended routinely") both score, provided the position is attributed. A new
+   `must_avoid` blocks presenting one jurisdiction as universal or marking the NICE stance
+   wrong, and the penicillin-allergy alternative was changed from clindamycin to
+   azithromycin/clarithromycin or cephalexin (AHA removed clindamycin in 2021).
+2. **diag-02 (Stage III vs IV boundary) — confirmed adequate.** The `must_avoid` already
+   blocks premature Stage IV, and `must_include` requires recognising that the absence of
+   complexity factors is what places the worked case at Stage III. No change needed.
+3. **The 20 conceptual/communication rubrics — reviewed, clean.** Skimmed for overstatement;
+   all appropriately hedged (perio–CVD kept associational, pregnancy treatment safe-but-not-
+   proven-preventive, periodontitis–Alzheimer's emerging-not-established, etc.). No edits.
 
 ## What this changes
 
-The dataset moved from "unvalidated draft" to **guideline-verified draft (v0.1.1)**.
-The honest status for publishing results is now: the accepted answers are sound and
-sourced; a periodontist's confirmation of the three items above is the last step before
-a published leaderboard.
+The dataset is now **clinician-reviewed, guideline-verified (v0.1.2)** — accepted answers are
+sound, sourced, and the flagged items are closed. Results published from this set are no longer
+gated on an open clinical question; future expansion (more questions, a second judge) remains on
+the roadmap.
 
 > Caveat on method: two guideline PDFs (perio.org, EFP) returned stale cached content to
 > the fetcher, so the staging/grading numeric thresholds rest on concordant text from AAP

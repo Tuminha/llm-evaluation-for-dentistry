@@ -71,7 +71,7 @@ OPENAI_LINEUP = ["gpt-5.5", "gpt-5.4-mini", "gpt-5.4-nano"]
 class OpenRouterClient:
     """Minimal chat-completions client with per-call latency measurement."""
 
-    def __init__(self, api_key: str | None = None, timeout: int = 90):
+    def __init__(self, api_key: str | None = None, timeout: int = 240):
         self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
         if not self.api_key:
             raise RuntimeError(
@@ -93,6 +93,7 @@ class OpenRouterClient:
             "model": model_id,
             "messages": [{"role": "user", "content": prompt}],
             "temperature": temperature,
+            "max_tokens": 12000,  # ceiling so a reasoning loop can't run away on cost
         }
         start = time.perf_counter()
         try:

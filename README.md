@@ -47,11 +47,11 @@ Each question looks like this:
 }
 ```
 
-> **Status: guideline-verified draft (v0.1.1).** The 10 most factual claims were checked
-> against primary guideline sources on 2026-06-10 — 9 confirmed, the perio–diabetes HbA1c
-> figure corrected, two rubrics tightened. A periodontist's sign-off on three flagged
-> wording items is the last step before publishing results. Full record:
-> [`VALIDATION.md`](VALIDATION.md). Dataset: [`data/dental_qa.json`](data/dental_qa.json).
+> **Status: clinician-reviewed, guideline-verified (v0.1.2).** The 10 most factual claims
+> were checked against primary guideline sources — 9 confirmed, the perio–diabetes HbA1c
+> figure corrected, two rubrics tightened — and the flagged wording items were then resolved
+> (pharm-02 made jurisdiction-aware, diag-02 confirmed, the 20 conceptual items reviewed clean).
+> Full record: [`VALIDATION.md`](VALIDATION.md). Dataset: [`data/dental_qa.json`](data/dental_qa.json).
 
 ## How scoring works
 
@@ -143,8 +143,8 @@ Edit `ROSTER` in [`src/providers.py`](src/providers.py) to add or swap models.
 ![Accuracy by model and clinical domain](assets/accuracy_by_domain.png)
 
 **Caveats — read before citing.** This is a pilot: **1 trial** (no consistency measured yet);
-the **judge is GPT-5.5**, so same-family self-preference is possible; the rubrics are a
-**guideline-verified draft** pending final clinician sign-off ([`VALIDATION.md`](VALIDATION.md)).
+the **judge is GPT-5.5**, so same-family self-preference is possible; the rubrics are
+**clinician-reviewed and guideline-verified** ([`VALIDATION.md`](VALIDATION.md)).
 The headline comparison this benchmark is built for — Claude / Gemini / Llama / DeepSeek
 alongside GPT, with a neutral judge — is the next run, via `--backend openrouter`.
 
@@ -170,7 +170,7 @@ legacy/                 # original W&B Weave course notebooks (provenance)
 ## Roadmap
 
 - **Done** — first pilot run (GPT family, 2026-06-10) with real published results above.
-- **Now** — periodontist sign-off on the 3 flagged rubric items ([`VALIDATION.md`](VALIDATION.md)); full cross-provider run (Claude / Gemini / Llama / DeepSeek + GPT) via `--backend openrouter` with a neutral judge.
+- **Now** — full cross-provider run (Claude / Gemini / Llama / DeepSeek + GPT) via `--backend openrouter`; rubrics are clinician-reviewed ([`VALIDATION.md`](VALIDATION.md)).
 - **Next** — expand to ~75–100 questions; add a second independent judge; ≥3 trials for consistency; per-difficulty breakdowns.
 - **Later** — publish the validated dataset to Hugging Face under Periospot; quarterly re-runs as
   models change; a Periospot write-up of the findings.
