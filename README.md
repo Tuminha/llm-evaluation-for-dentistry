@@ -43,9 +43,11 @@ Each question looks like this:
 }
 ```
 
-> **Status: DRAFT (v0.1.0).** The rubrics are grounded in mainstream guidelines but have
-> not yet been clinician-signed-off. They must be validated by a periodontist before any
-> results are published. See [`data/dental_qa.json`](data/dental_qa.json).
+> **Status: guideline-verified draft (v0.1.1).** The 10 most factual claims were checked
+> against primary guideline sources on 2026-06-10 — 9 confirmed, the perio–diabetes HbA1c
+> figure corrected, two rubrics tightened. A periodontist's sign-off on three flagged
+> wording items is the last step before publishing results. Full record:
+> [`VALIDATION.md`](VALIDATION.md). Dataset: [`data/dental_qa.json`](data/dental_qa.json).
 
 ## How scoring works
 
@@ -74,12 +76,19 @@ cp .env.example .env          # then add your OPENROUTER_API_KEY
 # Cheap sanity check — 3 questions, 1 trial, default lineup
 python src/run_eval.py --smoke
 
-# Full run — 3 trials for consistency, log to Weights & Biases
+# Full cross-provider run — 3 trials for consistency, log to Weights & Biases
 python src/run_eval.py --trials 3 --wandb
+
+# Claude-family pilot using only an ANTHROPIC_API_KEY (no OpenRouter needed)
+python src/run_eval.py --backend anthropic --trials 3
 
 # Custom lineup (keys from src/providers.py ROSTER)
 python src/run_eval.py --models claude-opus-4.8,gpt-5.2,gemini-3.1-pro,llama-4-maverick
 ```
+
+Two backends: `--backend openrouter` (default) reaches every provider through one key;
+`--backend anthropic` runs the Claude family directly with an Anthropic key — useful for a
+first pilot before wiring up OpenRouter.
 
 You don't need an API key to regenerate the dataset chart:
 
@@ -102,9 +111,11 @@ Edit `ROSTER` in [`src/providers.py`](src/providers.py) to add or swap models.
 
 ## Results
 
-> **No numbers are published here yet** — the dataset rubrics are still pending clinical
-> validation, so a published leaderboard would be premature. This is deliberate: the previous
-> version of this README claimed completed results with no data behind them.
+> **No numbers are published here yet** — the rubrics are guideline-verified but await a
+> periodontist's final sign-off (see [`VALIDATION.md`](VALIDATION.md)), and no benchmark run
+> has been executed. A published leaderboard before both would be premature. This is
+> deliberate: the previous version of this README claimed completed results with no data
+> behind them.
 
 Once the dataset is signed off, `python src/run_eval.py --trials 3` produces, in `results/`:
 
@@ -129,7 +140,7 @@ legacy/                 # original W&B Weave course notebooks (provenance)
 
 ## Roadmap
 
-- **Now** — clinician validation of the 30-question draft set; first real run; publish results.
+- **Now** — periodontist sign-off on the 3 flagged rubric items ([`VALIDATION.md`](VALIDATION.md)); first real run; publish results.
 - **Next** — expand to ~75–100 questions; add a second independent judge; per-difficulty breakdowns.
 - **Later** — publish the validated dataset to Hugging Face under Periospot; quarterly re-runs as
   models change; a Periospot write-up of the findings.

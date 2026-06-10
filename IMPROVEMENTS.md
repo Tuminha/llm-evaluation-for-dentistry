@@ -35,15 +35,15 @@ GPT/Claude-class models) into the core benchmark.
 
 ## Needs Francisco (blocks publishing real results)
 
-1. **Clinical sign-off on the 30 rubrics.** I drafted them from mainstream
-   guidelines, but a periodontist must validate each before any leaderboard is
-   published. This is the one thing I cannot do for you. Review
-   `data/dental_qa.json` and correct/confirm each rubric.
-2. **An `OPENROUTER_API_KEY` in `.env`.** Needed to actually run the matrix. With
-   it, `python src/run_eval.py --smoke` is a ~$0.10 sanity check; a full 3-trial
-   run across 8 models is a few dollars.
-3. **W&B entity** — runs default to project `dental-llm-benchmark` under your
-   default entity; confirm if you want `tuminha` vs `periospot`.
+1. **Sign-off on 3 flagged rubric items** (was "validate all 30"). On 2026-06-10 the
+   10 most factual claims were verified against primary guidelines — 9 confirmed, the
+   HbA1c figure corrected, two rubrics tightened. Only three judgement calls remain for
+   you: pharm-02 (AHA vs NICE jurisdiction), diag-02 (Stage III/IV boundary), and a skim
+   of the ~20 non-source-checked conceptual/communication items. See `VALIDATION.md`.
+2. **An API key in `.env`.** `ANTHROPIC_API_KEY` runs the Claude-family pilot
+   (`--backend anthropic`); `OPENROUTER_API_KEY` runs the full cross-provider matrix.
+   The harness auto-reads `.env`, then `~/.env.periospot`. A `--smoke` run is ~$0.10.
+   (W&B entity resolved: `tuminha` / project `dental-llm-benchmark`, wired in.)
 
 ## Next (after sign-off)
 

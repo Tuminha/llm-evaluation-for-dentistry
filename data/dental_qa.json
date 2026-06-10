@@ -1,10 +1,10 @@
 {
   "metadata": {
     "name": "Periospot Dental LLM Benchmark",
-    "version": "0.1.0-draft",
+    "version": "0.1.1-draft",
     "created": "2026-06-10",
-    "status": "DRAFT — requires clinician validation before any published run",
-    "validation_note": "Rubrics encode accepted answers grounded in mainstream guidelines (2017 World Workshop classification, EFP S3 2020 treatment guideline, AAOMS MRONJ, AHA/NICE prophylaxis). Francisco Teixeira Barbosa (periodontist) must review and sign off each rubric before results are published. Do not treat unvalidated rubrics as ground truth.",
+    "status": "DRAFT — guideline-verified; pending final clinician sign-off on flagged items (see VALIDATION.md)",
+    "validation_note": "Rubrics encode accepted answers grounded in mainstream guidelines (2017 World Workshop classification, EFP S3 2020 treatment guideline, AAOMS MRONJ 2022, AHA 2021 / NICE / SDCEP 2022, Cochrane 2022). On 2026-06-10 the 10 most factual claims were verified against primary guideline sources: 9 confirmed, sys-01 corrected (HbA1c ~0.4%), txt-04 and impl-03 wording tightened. Remaining sign-off items for Francisco Teixeira Barbosa (periodontist): pharm-02 AHA-vs-NICE jurisdiction, diag-02 Stage III/IV boundary. Full per-claim record with sources in VALIDATION.md.",
     "scoring": "Each question is scored by an LLM judge against its rubric criteria. A response is 'correct' only if it satisfies the must_include criteria and commits none of the must_avoid errors.",
     "domains": ["perio_diagnosis", "perio_treatment", "implants_periimplantitis", "oral_systemic", "pharmacology", "patient_communication"],
     "reference_frameworks": [
@@ -166,12 +166,13 @@
       "question": "What is the accepted treatment endpoint ('closed pocket') that defines a successfully treated periodontal site?",
       "rubric": {
         "must_include": [
-          "Probing depth of 4 mm or less",
-          "Absence of bleeding on probing (specifically no 4 mm sites that bleed and no sites of 5 mm or more)",
+          "Pocket closure: probing depth of 4 mm or less with no bleeding on probing at the treated site",
+          "Recognises the EFP actionable thresholds — residual probing depth ≥6 mm (surgery indication) and 4–5 mm sites with bleeding on probing (re-instrumentation) — rather than requiring zero probing depth",
           "Framed as the target for stability and reduced risk of progression/tooth loss"
         ],
         "must_avoid": [
           "Stating complete elimination of all probing depth is required",
+          "Treating a residual 5 mm site with no bleeding on probing as an automatic treatment failure",
           "Ignoring bleeding on probing as part of the endpoint"
         ]
       },
@@ -237,11 +238,12 @@
       "question": "What is the significance of keratinized mucosa width around dental implants?",
       "rubric": {
         "must_include": [
-          "A band of keratinized mucosa (commonly cited as at least 2 mm) is associated with better plaque control, less mucosal inflammation/recession, and patient comfort",
+          "A band of keratinized mucosa (commonly cited as at least 2 mm) is associated with better plaque control, less mucosal inflammation and recession, and patient comfort during hygiene",
           "Insufficient keratinized mucosa may be a reason to consider soft-tissue grafting in selected cases"
         ],
         "must_avoid": [
           "Stating keratinized mucosa is irrelevant to implant health",
+          "Claiming ≥2 mm keratinized mucosa is proven to improve implant survival or marginal bone level (evidence supports soft-tissue/inflammatory endpoints, not survival)",
           "Claiming grafting is always mandatory regardless of context"
         ]
       },
@@ -291,7 +293,7 @@
         "must_include": [
           "Diabetes (especially poorly controlled) increases risk and severity of periodontitis",
           "Periodontitis can adversely affect glycaemic control / insulin resistance",
-          "Successful periodontal therapy can produce a modest reduction in HbA1c (commonly reported around 0.3–0.4 percentage points) — described as an adjunct, not a diabetes cure"
+          "Successful periodontal therapy can produce a modest reduction in HbA1c of approximately 0.4 percentage points (Cochrane 2022: ~0.43% at 3–4 months) — described as an adjunct, not a diabetes cure, with the effect attenuating over time"
         ],
         "must_avoid": [
           "Overstating that periodontal treatment normalizes blood glucose or replaces diabetes management",
