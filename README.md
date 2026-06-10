@@ -65,8 +65,13 @@ Each question looks like this:
 3. **Consistency** — each question is asked N times; we measure how much the answers drift.
 4. **Latency** — wall-clock time per call is recorded for every request.
 
-The judge is configurable (`--judge`). Note the usual caveat: an LLM judge can show mild
-self-preference, so the judge model is reported alongside results and can be swapped.
+The judge is configurable (`--judge`), and judge bias is **measured, not assumed**: every
+stored answer is re-scored by an independent second judge from a different vendor
+([`src/judge_agreement.py`](src/judge_agreement.py)), with verdict agreement, Cohen's kappa,
+and per-model deltas published in [`results/judge_agreement.md`](results/judge_agreement.md).
+Refusals (a model declining to answer) are recorded as their own category — scored incorrect
+for deployment-view accuracy, but labeled per row so answer-rate and accuracy-on-answered
+can be reported separately.
 
 ## Quickstart
 
@@ -105,54 +110,80 @@ python src/build_visuals.py
 
 ## The model lineup
 
-Verified available on OpenRouter (2026-06-10). Spanning closed flagships, efficient tiers,
-and open-weight models:
+Verified available on OpenRouter (2026-06-10). The default lineup — the seven models in the
+results below — spans closed flagships, an efficient tier, and open-weight models:
 
 | Tier | Models |
 |---|---|
-| Flagship | Claude Opus 4.8, GPT-5.2, Gemini 3.1 Pro |
-| Efficient | Claude Haiku 4.5, GPT-5 mini, Gemini 2.5 Flash |
+| Flagship | Claude Fable 5, Claude Opus 4.8, GPT-5.2, Gemini 3.1 Pro |
+| Efficient | Qwen3.7 Plus *(plus available: Claude Haiku 4.5, GPT-5 mini, Gemini 2.5 Flash)* |
 | Open-weight | Llama 4 Maverick, DeepSeek V3.2 |
 
 Edit `ROSTER` in [`src/providers.py`](src/providers.py) to add or swap models.
 
 ## Results
 
-> **First pilot run — 2026-06-10.** 30 clinician-verified questions × 3 OpenAI models,
-> judged by GPT-5.5, 1 trial. Real data, no placeholders. Public results:
-> **[W&B report](https://wandb.ai/tuminha/dental-llm-benchmark/reports/Dental-LLM-Benchmark-Results--VmlldzoxNzE4NDU3NQ)**
-> · [project](https://wandb.ai/tuminha/dental-llm-benchmark).
+> **Cross-provider run — 2026-06-10.** 30 clinician-verified questions × 7 models via
+> OpenRouter, judged by Claude Opus 4.8 with a full GPT-5.2 second-judge pass, 1 trial.
+> Real data, no placeholders; every answer transcript and both judges' verdicts are in
+> [`results/`](results/). W&B: [project](https://wandb.ai/tuminha/dental-llm-benchmark).
+
+| Model | Accuracy (95% CI) | Answer rate | Acc. on answered | Mean latency |
+|---|---|---|---|---|
+| GPT-5.2 | **96.7%** [90.0–100] | 100% | 96.7% | 14.8 s |
+| Claude Opus 4.8 | 93.3% [83.3–100] | 100% | 93.3% | 12.1 s |
+| Gemini 3.1 Pro | 90.0% [76.7–100] | 100% | 90.0% | 20.5 s |
+| Qwen3.7 Plus | 83.3% [70.0–96.7] | 100% | 83.3% | 40.8 s |
+| Claude Fable 5 | 80.0% [66.7–93.3] | **83.3%** | **96.0%** | 15.0 s |
+| DeepSeek V3.2 | 70.0% [53.3–86.7] | 100% | 70.0% | 34.1 s |
+| Llama 4 Maverick | 46.7% [30.0–63.3] | 100% | 46.7% | 25.7 s |
+
+CIs are bootstrap over questions (10k resamples, seed 42). Accuracy counts a refusal as a
+failure (deployment view); "acc. on answered" is the capability view.
 
 **Key findings**
 
-- **GPT-5.5 leads at 77%**, GPT-5.4 mini 60%, GPT-5.4 nano 33% (57% overall across the three).
-- **Pharmacology and periodontal treatment are the hardest domains for every model** — the
-  areas where a wrong answer is most dangerous (drug doses, MRONJ, antibiotic prophylaxis,
-  anticoagulants, stepwise protocols).
-- Even GPT-5.5 scores **100%** on diagnosis, implants, and oral-systemic medicine but only
-  **40%** on pharmacology — frontier capability is uneven across clinical sub-domains.
-
-| Model | Accuracy | Mean latency |
-|---|---|---|
-| GPT-5.5 | 77% | 22.1 s |
-| GPT-5.4 mini | 60% | 3.1 s |
-| GPT-5.4 nano | 33% | 3.6 s |
+- **The flagship cluster is statistically tied.** GPT-5.2, Claude Opus 4.8, and Gemini 3.1
+  Pro have heavily overlapping CIs — at n=30, no ranking among them is claimable. The gap
+  between that cluster and the open-weight models is real and large.
+- **Claude Fable 5 refused 5 of 30 questions** (perio–diabetes, pregnancy, smoking,
+  Alzheimer's, supracrestal tissue attachment) — its safety layer emits a `refusal` stop,
+  reproduced across both Amazon Bedrock and Anthropic first-party serving, twice cutting an
+  answer off mid-stream. On the 25 questions it answered, it ties the leaders (96.0%). The
+  refused topics are almost exactly the **oral-systemic evidence questions** — territory
+  where clinicians most need calibrated answers. Refusal rows carry full provenance labels.
+- **Pharmacology separates the field.** Llama 4 Maverick scored **0%** on pharmacology
+  (MRONJ drugs, endocarditis prophylaxis, anticoagulants) — the domain where a wrong or
+  missing answer is most dangerous. DeepSeek V3.2's weak spot is 2017 World Workshop
+  staging/grading (40% on diagnosis).
+- **Qwen3.7 Plus is the budget surprise**: 83.3% at $0.40/$1.60 per M tokens — above one
+  flagship on deployment accuracy, at roughly 1/30th of flagship pricing.
+- **Judge bias was measured, not assumed.** A GPT-5.2 second-judge pass over all 205
+  answered rows agreed with Opus 4.8 on 81.0% of verdicts (Cohen's kappa 0.507). GPT-5.2
+  is uniformly harsher — *every* model scores lower under it, **including GPT-5.2 itself**
+  (−13.3 pts, identical to Opus 4.8's delta), and the Anthropic models' deltas sit in the
+  middle of the distribution. That is judge severity, not family favoritism; model ranking
+  is stable under both judges. Full table: [`results/judge_agreement.md`](results/judge_agreement.md).
+- **Run-to-run stability:** the protocol was run twice end-to-end on the original 5-model
+  lineup; per-model accuracy shifted by at most one question (e.g. GPT-5.2 93.3→96.7).
 
 ![Accuracy by model](assets/accuracy_by_model.png)
 
 ![Accuracy by model and clinical domain](assets/accuracy_by_domain.png)
 
-**Caveats — read before citing.** This is a pilot: **1 trial** (no consistency measured yet);
-the **judge is GPT-5.5**, so same-family self-preference is possible; the rubrics are
-**clinician-reviewed and guideline-verified** ([`VALIDATION.md`](VALIDATION.md)).
-The headline comparison this benchmark is built for — Claude / Gemini / Llama / DeepSeek
-alongside GPT, with a neutral judge — is the next run, via `--backend openrouter`.
+**Caveats — read before citing.** n=30 means wide CIs — treat small gaps as noise; **1 trial**
+per question (temperature 0; the consistency metric needs `--trials 3`); questions and rubrics
+were authored and validated by **one periodontist** (guideline-verified:
+[`VALIDATION.md`](VALIDATION.md)); absolute accuracy is **judge-dependent** (moderate
+inter-judge agreement — ranks are stable, levels are not); latency reflects one gateway
+(OpenRouter) on one day.
 
 Reproduce or extend:
 
 ```bash
-python src/run_eval.py --backend openai --trials 1    # this pilot
-python src/run_eval.py --trials 3 --wandb             # full cross-provider, 3 trials, logged
+python src/run_eval.py --backend openrouter --trials 1   # this run
+python src/judge_agreement.py                            # second-judge agreement pass
+python src/run_eval.py --trials 3 --wandb                # add consistency, log to W&B
 ```
 
 ## Repo layout
@@ -169,11 +200,13 @@ legacy/                 # original W&B Weave course notebooks (provenance)
 
 ## Roadmap
 
-- **Done** — first pilot run (GPT family, 2026-06-10) with real published results above.
-- **Now** — full cross-provider run (Claude / Gemini / Llama / DeepSeek + GPT) via `--backend openrouter`; rubrics are clinician-reviewed ([`VALIDATION.md`](VALIDATION.md)).
-- **Next** — expand to ~75–100 questions; add a second independent judge; ≥3 trials for consistency; per-difficulty breakdowns.
-- **Later** — publish the validated dataset to Hugging Face under Periospot; quarterly re-runs as
-  models change; a Periospot write-up of the findings.
+- **Done** — GPT-family pilot; full 7-model cross-provider run with answer transcripts
+  (2026-06-10); second-judge agreement pass (GPT-5.2 vs Opus 4.8); refusal detection with
+  per-row provider/finish-reason provenance.
+- **Next** — expand to ~75–100 questions; ≥3 trials for consistency; per-difficulty
+  breakdowns; a third judge for a proper jury.
+- **Later** — publish the validated dataset to Hugging Face under Periospot; quarterly
+  re-runs as models change; a Periospot write-up of the findings.
 
 ## Contributing
 

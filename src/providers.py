@@ -28,9 +28,11 @@ class Model:
 # Verified available on OpenRouter on 2026-06-10. Edit freely — the runner
 # accepts --models to override this default lineup.
 ROSTER: dict[str, Model] = {
+    "claude-fable-5":   Model("anthropic/claude-fable-5",         "Claude Fable 5",   "flagship"),
     "claude-opus-4.8":  Model("anthropic/claude-opus-4.8",        "Claude Opus 4.8",  "flagship"),
     "gpt-5.2":          Model("openai/gpt-5.2",                   "GPT-5.2",          "flagship"),
     "gemini-3.1-pro":   Model("google/gemini-3.1-pro-preview",    "Gemini 3.1 Pro",   "flagship"),
+    "qwen3.7-plus":     Model("qwen/qwen3.7-plus",                "Qwen3.7 Plus",     "efficient"),
     "claude-haiku-4.5": Model("anthropic/claude-haiku-4.5",       "Claude Haiku 4.5", "efficient"),
     "gpt-5-mini":       Model("openai/gpt-5-mini",                "GPT-5 mini",       "efficient"),
     "gemini-2.5-flash": Model("google/gemini-2.5-flash",          "Gemini 2.5 Flash", "efficient"),
@@ -40,9 +42,11 @@ ROSTER: dict[str, Model] = {
 
 # A leaner default so a first real run is cheap: one model per tier pairing.
 DEFAULT_LINEUP = [
+    "claude-fable-5",
     "claude-opus-4.8",
     "gpt-5.2",
     "gemini-3.1-pro",
+    "qwen3.7-plus",
     "llama-4-maverick",
     "deepseek-v3.2",
 ]
@@ -101,8 +105,18 @@ class OpenRouterClient:
             latency = time.perf_counter() - start
             resp.raise_for_status()
             data = resp.json()
-            text = data["choices"][0]["message"]["content"]
-            return {"text": text, "latency_s": round(latency, 3), "ok": True, "error": None}
+            choice = data["choices"][0]
+            text = choice["message"]["content"]
+            meta = {"provider": data.get("provider"), "finish_reason": choice.get("finish_reason"),
+                    "native_finish_reason": choice.get("native_finish_reason")}
+            if not text:
+                # HTTP 200 with empty content: either an infra hiccup or — for
+                # finish_reason=content_filter — a model-level refusal. Either way
+                # there is no answer to judge; surface the reason so the runner can
+                # label refusals instead of silently scoring "wrong".
+                return {"text": None, "latency_s": round(latency, 3), "ok": False,
+                        "error": f"empty content (finish_reason={choice.get('finish_reason')})", **meta}
+            return {"text": text, "latency_s": round(latency, 3), "ok": True, "error": None, **meta}
         except Exception as e:  # noqa: BLE001 - we want every failure captured as data
             return {
                 "text": None,

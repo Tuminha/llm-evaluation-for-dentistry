@@ -140,16 +140,23 @@ def run(args) -> None:
                 if (model.label, q["id"]) in done:
                     continue
                 answers, latencies = [], []
+                last_err, meta = None, {}
                 for t in range(trials):
                     out = client.complete(model.id, q["question"])
+                    if not meta:
+                        meta = {"provider": out.get("provider"),
+                                "finish_reason": out.get("finish_reason")}
                     if out["ok"]:
                         answers.append(out["text"])
                         latencies.append(out["latency_s"])
                     else:
+                        last_err = out["error"]
                         print(f"  ! {q['id']} trial {t}: {out['error'][:80]}")
                 first = answers[0] if answers else ""
                 verdict = (judge_answer(client, judge_id, q["question"], q["rubric"], first)
-                           if first else {"correct": False, "explanation": "no answer"})
+                           if first else
+                           {"correct": False,
+                            "explanation": f"no answer ({last_err})" if last_err else "no answer"})
                 row = {
                     "model": model.label, "model_id": model.id, "tier": model.tier,
                     "qid": q["id"], "domain": q["domain"], "difficulty": q["difficulty"],
@@ -160,6 +167,17 @@ def run(args) -> None:
                     "mean_latency_s": round(sum(latencies) / len(latencies), 3) if latencies else None,
                     "consistency": consistency_score(answers) if trials > 1 else None,
                     "judge_explanation": verdict.get("explanation", ""),
+                    # Full answer text — required for re-judging (judge-agreement
+                    # analysis), releasing transcripts, and any post-hoc audit.
+                    "answer": first,
+                    "answers_all": answers if trials > 1 else None,
+                    "provider": meta.get("provider"),
+                    "finish_reason": meta.get("finish_reason"),
+                    # A refusal is model behavior, not an infra failure: scored
+                    # incorrect for deployment-view accuracy, but labeled so
+                    # answer-rate and accuracy-on-answered can be reported.
+                    "refusal": bool(not first and last_err and "content_filter" in last_err),
+                    "error": None if first else last_err,
                 }
                 rows.append(row)
                 raw.write(json.dumps(row) + "\n")
@@ -231,7 +249,8 @@ def main() -> None:
                    help="openrouter = all providers (one key); anthropic = Claude family; openai = GPT family")
     p.add_argument("--models", help="comma-separated roster keys (default: backend's default lineup)")
     p.add_argument("--judge", help="roster key or raw model id for the judge (default: a flagship)")
-    p.add_argument("--trials", type=int, default=3, help="trials per question (consistency)")
+    p.add_argument("--trials", type=int, default=1,
+                   help="trials per question; >1 adds the consistency metric at N× candidate cost")
     p.add_argument("--limit", type=int, help="cap number of questions (keeps domain spread)")
     p.add_argument("--smoke", action="store_true", help="3 questions, 1 trial — cheap sanity check")
     p.add_argument("--wandb", action="store_true", help="log to Weights & Biases")
