@@ -118,20 +118,41 @@ Edit `ROSTER` in [`src/providers.py`](src/providers.py) to add or swap models.
 
 ## Results
 
-> **No numbers are published here yet** — the rubrics are guideline-verified but await a
-> periodontist's final sign-off (see [`VALIDATION.md`](VALIDATION.md)), and no benchmark run
-> has been executed. A published leaderboard before both would be premature. This is
-> deliberate: the previous version of this README claimed completed results with no data
-> behind them.
+> **First pilot run — 2026-06-10.** 30 clinician-verified questions × 3 OpenAI models,
+> judged by GPT-5.5, 1 trial. Real data, no placeholders. Live on Weights & Biases:
+> [tuminha/dental-llm-benchmark](https://wandb.ai/tuminha/dental-llm-benchmark).
 
-Once the dataset is signed off, `python src/run_eval.py --trials 3` produces, in `results/`:
+**Key findings**
 
-- `summary.md` — accuracy + latency leaderboard, plus a model × clinical-domain table
-- `accuracy_by_model.png` — accuracy ranked by model, coloured by tier
-- `accuracy_by_domain.png` — a model × domain accuracy heatmap (where each model is strong/weak)
-- `results.jsonl` — the full per-answer record, including the judge's reasoning
+- **GPT-5.5 leads at 77%**, GPT-5.4 mini 60%, GPT-5.4 nano 33% (57% overall across the three).
+- **Pharmacology and periodontal treatment are the hardest domains for every model** — the
+  areas where a wrong answer is most dangerous (drug doses, MRONJ, antibiotic prophylaxis,
+  anticoagulants, stepwise protocols).
+- Even GPT-5.5 scores **100%** on diagnosis, implants, and oral-systemic medicine but only
+  **40%** on pharmacology — frontier capability is uneven across clinical sub-domains.
 
-The results section of this README will then embed those charts — generated from real runs only.
+| Model | Accuracy | Mean latency |
+|---|---|---|
+| GPT-5.5 | 77% | 22.1 s |
+| GPT-5.4 mini | 60% | 3.1 s |
+| GPT-5.4 nano | 33% | 3.6 s |
+
+![Accuracy by model](assets/accuracy_by_model.png)
+
+![Accuracy by model and clinical domain](assets/accuracy_by_domain.png)
+
+**Caveats — read before citing.** This is a pilot: **1 trial** (no consistency measured yet);
+the **judge is GPT-5.5**, so same-family self-preference is possible; the rubrics are a
+**guideline-verified draft** pending final clinician sign-off ([`VALIDATION.md`](VALIDATION.md)).
+The headline comparison this benchmark is built for — Claude / Gemini / Llama / DeepSeek
+alongside GPT, with a neutral judge — is the next run, via `--backend openrouter`.
+
+Reproduce or extend:
+
+```bash
+python src/run_eval.py --backend openai --trials 1    # this pilot
+python src/run_eval.py --trials 3 --wandb             # full cross-provider, 3 trials, logged
+```
 
 ## Repo layout
 
@@ -147,8 +168,9 @@ legacy/                 # original W&B Weave course notebooks (provenance)
 
 ## Roadmap
 
-- **Now** — periodontist sign-off on the 3 flagged rubric items ([`VALIDATION.md`](VALIDATION.md)); first real run; publish results.
-- **Next** — expand to ~75–100 questions; add a second independent judge; per-difficulty breakdowns.
+- **Done** — first pilot run (GPT family, 2026-06-10) with real published results above.
+- **Now** — periodontist sign-off on the 3 flagged rubric items ([`VALIDATION.md`](VALIDATION.md)); full cross-provider run (Claude / Gemini / Llama / DeepSeek + GPT) via `--backend openrouter` with a neutral judge.
+- **Next** — expand to ~75–100 questions; add a second independent judge; ≥3 trials for consistency; per-difficulty breakdowns.
 - **Later** — publish the validated dataset to Hugging Face under Periospot; quarterly re-runs as
   models change; a Periospot write-up of the findings.
 

@@ -162,7 +162,7 @@ class OpenAIClient:
     tokens count against it.
     """
 
-    def __init__(self, api_key: str | None = None, max_tokens: int = 3000, timeout: int = 120):
+    def __init__(self, api_key: str | None = None, max_tokens: int = 8000, timeout: int = 180):
         from openai import OpenAI  # imported lazily so other backends need no SDK
 
         key = api_key or os.environ.get("OPENAI_API_KEY")
