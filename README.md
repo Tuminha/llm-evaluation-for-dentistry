@@ -119,8 +119,9 @@ Edit `ROSTER` in [`src/providers.py`](src/providers.py) to add or swap models.
 ## Results
 
 > **First pilot run — 2026-06-10.** 30 clinician-verified questions × 3 OpenAI models,
-> judged by GPT-5.5, 1 trial. Real data, no placeholders. Live on Weights & Biases:
-> [tuminha/dental-llm-benchmark](https://wandb.ai/tuminha/dental-llm-benchmark).
+> judged by GPT-5.5, 1 trial. Real data, no placeholders. Public results:
+> **[W&B report](https://wandb.ai/tuminha/dental-llm-benchmark/reports/Dental-LLM-Benchmark-Results--VmlldzoxNzE4NDU3NQ)**
+> · [project](https://wandb.ai/tuminha/dental-llm-benchmark).
 
 **Key findings**
 

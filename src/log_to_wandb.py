@@ -63,14 +63,17 @@ def main() -> None:
     models = sorted(acc, key=lambda m: acc[m], reverse=True)
     bar = wandb.Table(data=[[m, round(acc[m], 1)] for m in models], columns=["model", "accuracy_pct"])
 
-    log = {
-        "overall_accuracy_pct": overall,
-        "results": table,
-        "accuracy_by_model": wandb.plot.bar(bar, "model", "accuracy_pct", title="Dental accuracy by model"),
-    }
+    # Per-model accuracy/latency go in run.summary (single values) — logging them as
+    # metrics would create messy single-point line panels in reports.
+    run.summary["overall_accuracy_pct"] = overall
     for m in models:
-        log[f"accuracy/{m}"] = round(acc[m], 1)
-        log[f"latency_s/{m}"] = lat[m]
+        run.summary[f"accuracy_pct/{m}"] = round(acc[m], 1)
+        run.summary[f"latency_s/{m}"] = lat[m]
+
+    log = {
+        "results": table,
+        "accuracy_by_model_bar": wandb.plot.bar(bar, "model", "accuracy_pct", title="Dental accuracy by model"),
+    }
     for png in ["accuracy_by_model.png", "accuracy_by_domain.png"]:
         f = RESULTS / png
         if f.exists():
