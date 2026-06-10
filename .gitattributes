@@ -1,0 +1,4 @@
+# Keep GitHub's language stats representative of the actual project (Python).
+# The legacy/ folder holds archived W&B course notebooks kept only for provenance.
+legacy/** linguist-vendored
+*.faiss binary
