@@ -2,6 +2,7 @@
 requests
 python-dotenv
 matplotlib
+anthropic        # native Claude backend (src/run_eval.py --backend anthropic)
 
 # Optional: experiment tracking (src/run_eval.py --wandb)
 wandb

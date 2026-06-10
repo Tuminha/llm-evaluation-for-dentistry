@@ -25,9 +25,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from dotenv import load_dotenv  # noqa: E402
+from dotenv import dotenv_values, load_dotenv  # noqa: E402
 
-from providers import DEFAULT_LINEUP, ROSTER, OpenRouterClient  # noqa: E402
+from providers import (  # noqa: E402
+    CLAUDE_LINEUP,
+    CLAUDE_ROSTER,
+    DEFAULT_LINEUP,
+    ROSTER,
+    AnthropicClient,
+    OpenRouterClient,
+)
 from scorers import consistency_score, judge_answer  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -52,16 +59,52 @@ def load_dataset(limit: int | None = None) -> tuple[dict, list[dict]]:
     return payload["metadata"], questions
 
 
-def run(args) -> None:
-    load_dotenv(ROOT / ".env")
-    client = OpenRouterClient()
+def _ensure_key(var: str) -> str | None:
+    """Resolve an API key without ever printing it. Returns the source name.
 
-    lineup_keys = args.models.split(",") if args.models else DEFAULT_LINEUP
-    unknown = [k for k in lineup_keys if k not in ROSTER]
+    Order: existing env -> repo .env -> ~/.env.periospot (Francisco's local store,
+    used here only to pick up the key he authorized for this run)."""
+    if os.environ.get(var):
+        return "environment"
+    load_dotenv(ROOT / ".env")
+    if os.environ.get(var):
+        return "repo .env"
+    home_env = Path.home() / ".env.periospot"
+    if home_env.exists():
+        val = dotenv_values(home_env).get(var)
+        if val:
+            os.environ[var] = val
+            return str(home_env)
+    return None
+
+
+def run(args) -> None:
+    if args.backend == "anthropic":
+        roster, default_lineup = CLAUDE_ROSTER, CLAUDE_LINEUP
+        src = _ensure_key("ANTHROPIC_API_KEY")
+        if not src:
+            sys.exit("No ANTHROPIC_API_KEY found (checked env, repo .env, ~/.env.periospot). "
+                     "Add it to .env and retry.")
+        print(f"Backend: anthropic (key from {src})")
+        client = AnthropicClient()
+        default_judge = "opus-4.8"
+    else:
+        roster, default_lineup = ROSTER, DEFAULT_LINEUP
+        src = _ensure_key("OPENROUTER_API_KEY")
+        if not src:
+            sys.exit("No OPENROUTER_API_KEY found (checked env, repo .env, ~/.env.periospot). "
+                     "Add it to .env and retry.")
+        print(f"Backend: openrouter (key from {src})")
+        client = OpenRouterClient()
+        default_judge = "claude-opus-4.8"
+
+    lineup_keys = args.models.split(",") if args.models else default_lineup
+    unknown = [k for k in lineup_keys if k not in roster]
     if unknown:
-        sys.exit(f"Unknown model keys: {unknown}. Known: {list(ROSTER)}")
-    models = [ROSTER[k] for k in lineup_keys]
-    judge_id = ROSTER[args.judge].id if args.judge in ROSTER else args.judge
+        sys.exit(f"Unknown model keys: {unknown}. Known for {args.backend}: {list(roster)}")
+    models = [roster[k] for k in lineup_keys]
+    judge_key = args.judge or default_judge
+    judge_id = roster[judge_key].id if judge_key in roster else judge_key
 
     _, questions = load_dataset(limit=3 if args.smoke else args.limit)
     trials = 1 if args.smoke else args.trials
@@ -74,8 +117,9 @@ def run(args) -> None:
     run = None
     if args.wandb:
         import wandb  # noqa: PLC0415
-        run = wandb.init(project="dental-llm-benchmark",
-                         config={"models": lineup_keys, "judge": judge_id, "trials": trials})
+        run = wandb.init(entity="tuminha", project="dental-llm-benchmark",
+                         config={"backend": args.backend, "models": lineup_keys,
+                                 "judge": judge_id, "trials": trials})
 
     RESULTS_DIR.mkdir(exist_ok=True)
     raw_path = RESULTS_DIR / "results.jsonl"
@@ -172,8 +216,10 @@ def write_summary(summary: dict, rows: list[dict]) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Run the Periospot dental LLM benchmark.")
-    p.add_argument("--models", help="comma-separated keys from ROSTER (default: DEFAULT_LINEUP)")
-    p.add_argument("--judge", default="claude-opus-4.8", help="ROSTER key or raw OpenRouter id for the judge")
+    p.add_argument("--backend", choices=["openrouter", "anthropic"], default="openrouter",
+                   help="openrouter = all providers (one key); anthropic = Claude family via your Anthropic key")
+    p.add_argument("--models", help="comma-separated roster keys (default: backend's default lineup)")
+    p.add_argument("--judge", help="roster key or raw model id for the judge (default: a flagship)")
     p.add_argument("--trials", type=int, default=3, help="trials per question (consistency)")
     p.add_argument("--limit", type=int, help="cap number of questions (keeps domain spread)")
     p.add_argument("--smoke", action="store_true", help="3 questions, 1 trial — cheap sanity check")

@@ -47,6 +47,17 @@ DEFAULT_LINEUP = [
     "deepseek-v3.2",
 ]
 
+# Native Anthropic backend (Claude family only — uses ANTHROPIC_API_KEY directly,
+# no OpenRouter). IDs are the bare first-party strings. Use this to run a Claude
+# pilot with an Anthropic key; switch to the OpenRouter roster above for the full
+# cross-provider comparison.
+CLAUDE_ROSTER: dict[str, Model] = {
+    "opus-4.8":   Model("claude-opus-4-8",   "Claude Opus 4.8",  "flagship"),
+    "sonnet-4.6": Model("claude-sonnet-4-6", "Claude Sonnet 4.6", "efficient"),
+    "haiku-4.5":  Model("claude-haiku-4-5",  "Claude Haiku 4.5",  "efficient"),
+}
+CLAUDE_LINEUP = ["opus-4.8", "sonnet-4.6", "haiku-4.5"]
+
 
 class OpenRouterClient:
     """Minimal chat-completions client with per-call latency measurement."""
@@ -83,6 +94,48 @@ class OpenRouterClient:
             text = data["choices"][0]["message"]["content"]
             return {"text": text, "latency_s": round(latency, 3), "ok": True, "error": None}
         except Exception as e:  # noqa: BLE001 - we want every failure captured as data
+            return {
+                "text": None,
+                "latency_s": round(time.perf_counter() - start, 3),
+                "ok": False,
+                "error": str(e),
+            }
+
+
+class AnthropicClient:
+    """Native Anthropic Messages API client (official SDK), same .complete() shape.
+
+    Reaches Claude models only. Note: temperature/top_p are NOT sent — current
+    Claude models (Opus 4.8/4.7, Fable 5) reject sampling parameters, and thinking
+    is left off by default for fast, low-variance benchmark answers.
+    """
+
+    def __init__(self, api_key: str | None = None, max_tokens: int = 1024, timeout: int = 90):
+        import anthropic  # imported lazily so the OpenRouter path needs no SDK
+
+        key = api_key or os.environ.get("ANTHROPIC_API_KEY")
+        if not key:
+            raise RuntimeError(
+                "ANTHROPIC_API_KEY not set. Add it to .env (or your shell) before "
+                "running with --backend anthropic."
+            )
+        self.client = anthropic.Anthropic(api_key=key, timeout=timeout)
+        self.max_tokens = max_tokens
+
+    def complete(self, model_id: str, prompt: str, temperature: float | None = None) -> dict:
+        """Return {text, latency_s, ok, error}. ``temperature`` is accepted for a
+        uniform interface with OpenRouterClient but intentionally not forwarded."""
+        start = time.perf_counter()
+        try:
+            msg = self.client.messages.create(
+                model=model_id,
+                max_tokens=self.max_tokens,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            latency = time.perf_counter() - start
+            text = next((b.text for b in msg.content if b.type == "text"), "")
+            return {"text": text, "latency_s": round(latency, 3), "ok": True, "error": None}
+        except Exception as e:  # noqa: BLE001
             return {
                 "text": None,
                 "latency_s": round(time.perf_counter() - start, 3),
