@@ -11,3 +11,6 @@ weave
 
 # Legacy W&B course notebooks (legacy/) also use:
 #   openai groq together faiss-cpu numpy nest_asyncio set-env-colab-kaggle-dotenv
+
+# Optional: render SVG assets to PNG (social card)
+cairosvg

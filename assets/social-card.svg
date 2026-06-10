@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0E1116"/>
+      <stop offset="1" stop-color="#11161D"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="640" fill="url(#bg)"/>
+
+  <!-- faint chart axes on the right -->
+  <g stroke="#1B2230" stroke-width="1.5">
+    <line x1="800" y1="170" x2="800" y2="470"/>
+    <line x1="800" y1="470" x2="1180" y2="470"/>
+  </g>
+
+  <!-- eyebrow -->
+  <text x="90" y="150" fill="#3FB6B2" font-size="20" font-weight="700" letter-spacing="4">PERIOSPOT · DENTAL LLM BENCHMARK</text>
+
+  <!-- title -->
+  <text x="86" y="268" fill="#E6EDF3" font-size="78" font-weight="800">Which LLMs can a</text>
+  <text x="86" y="356" fill="#E6EDF3" font-size="78" font-weight="800">dentist <tspan fill="#3FB6B2">trust?</tspan></text>
+  <rect x="90" y="392" width="88" height="5" rx="2.5" fill="#E0A458"/>
+
+  <!-- subtitle -->
+  <text x="90" y="452" fill="#9FB0C0" font-size="25">30 clinician-verified questions · 6 clinical domains</text>
+  <text x="90" y="488" fill="#9FB0C0" font-size="25">scored the same way, every model, every run.</text>
+
+  <!-- abstract leaderboard motif (decorative — no fabricated scores) -->
+  <g>
+    <rect x="800" y="196" width="300" height="34" rx="8" fill="#3FB6B2"/>
+    <rect x="800" y="250" width="252" height="34" rx="8" fill="#3FB6B2" opacity="0.85"/>
+    <rect x="800" y="304" width="210" height="34" rx="8" fill="#E0A458"/>
+    <rect x="800" y="358" width="166" height="34" rx="8" fill="#E0A458" opacity="0.85"/>
+    <rect x="800" y="412" width="118" height="34" rx="8" fill="#9A7DDE"/>
+    <text x="1158" y="161" fill="#6E7681" font-size="15" text-anchor="end" letter-spacing="2">ACCURACY</text>
+    <polygon points="1166,150 1180,156 1166,162" fill="#6E7681"/>
+  </g>
+
+  <!-- attribution -->
+  <text x="90" y="560" fill="#5B6573" font-size="17">github.com/Tuminha/llm-evaluation-for-dentistry</text>
+  <text x="1190" y="560" fill="#5B6573" font-size="17" text-anchor="end">MIT · periospot.com</text>
+</svg>
