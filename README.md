@@ -5,6 +5,7 @@
 ![Backends](https://img.shields.io/badge/backends-OpenRouter%20%C2%B7%20OpenAI%20%C2%B7%20Anthropic-9A7DDE.svg)
 ![Rubrics](https://img.shields.io/badge/rubrics-guideline%20verified-E0A458.svg)
 ![Tracking](https://img.shields.io/badge/tracking-Weights%20%26%20Biases-E0A458.svg)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20647357.svg)](https://doi.org/10.5281/zenodo.20647357)
 
 A reproducible benchmark that measures how well current large language models answer
 **clinical dental questions** — across periodontics, implants, oral-systemic medicine,
@@ -252,7 +253,8 @@ If you use this benchmark or dataset, please cite it:
   author = {Teixeira Barbosa, Francisco and Robles Cantero, Daniel and Brizuela Velasco, Aritza},
   title  = {Evaluating Frontier Language Models on Clinician-Reviewed Dental Questions: A Reproducible Benchmark},
   year   = {2026},
-  url    = {https://github.com/Tuminha/llm-evaluation-for-dentistry}
+  url    = {https://github.com/Tuminha/llm-evaluation-for-dentistry},
+  doi    = {10.5281/zenodo.20647357}
 }
 ```
 
