@@ -8,7 +8,15 @@
 
 A reproducible benchmark that measures how well current large language models answer
 **clinical dental questions** — across periodontics, implants, oral-systemic medicine,
-pharmacology, and patient communication. Part of the [Periospot](https://periospot.com) project.
+pharmacology, and patient communication.
+
+## Read the report
+
+- Interactive GitHub Pages report: <https://tuminha.github.io/llm-evaluation-for-dentistry/>
+- Blog-style summary: <https://tuminha.github.io/llm-evaluation-for-dentistry/blog.html>
+- PDF manuscript: [`paper/main.pdf`](paper/main.pdf)
+- Visual summary infographic: [`assets/visual-summary.svg`](assets/visual-summary.svg)
+- Clinical error audit: [`results/clinical_error_analysis.md`](results/clinical_error_analysis.md)
 
 ## Why this exists
 
@@ -168,6 +176,11 @@ and judge-agreement metrics with `python src/analysis.py`, which writes
   own answers lower than Opus did (76.7% vs 93.3%). That argues for judge severity rather
   than simple same-family favoritism. Full tables: [`results/judge_agreement.md`](results/judge_agreement.md)
   and [`results/judge_agreement_gpt55.md`](results/judge_agreement_gpt55.md).
+- **Clinical error analysis adds dentist-facing interpretation.** A post-hoc audit of the 44
+  rows marked incorrect separated 34 clear clinical answer errors from 5 refusals and 5
+  primary-judge internal-consistency candidates. The most common clinical failures were missed
+  EFP treatment thresholds, pharmacology safety nuances, peri-implant evidence overstatement,
+  and diagnostic cutoff errors. Full audit: [`results/clinical_error_analysis.md`](results/clinical_error_analysis.md).
 - **Run-to-run stability:** the protocol was run twice end-to-end on the original 5-model
   lineup; per-model accuracy shifted by at most one question (e.g. GPT-5.2 93.3→96.7).
 
@@ -196,11 +209,13 @@ python src/run_eval.py --trials 3 --wandb                # add consistency, log 
 ## Repo layout
 
 ```
-data/dental_qa.json     # the benchmark dataset (draft)
+data/dental_qa.json     # the benchmark dataset
 src/providers.py        # model roster + OpenRouter client
 src/scorers.py          # LLM-judge + consistency scoring
 src/run_eval.py         # CLI runner -> results/ + charts
 src/build_visuals.py    # charts (dataset chart needs no API key)
+src/build_pages.py      # interactive GitHub Pages report + infographic
+docs/                   # static interactive report for GitHub Pages
 assets/                 # committed README visuals
 legacy/                 # original W&B Weave course notebooks (provenance)
 ```
@@ -234,8 +249,8 @@ If you use this benchmark or dataset, please cite it:
 
 ```bibtex
 @misc{teixeirabarbosa_dental_llm_benchmark_2026,
-  author = {Teixeira Barbosa, Francisco},
-  title  = {Periospot Dental LLM Benchmark: clinical dental knowledge evaluation for language models},
+  author = {Teixeira Barbosa, Francisco and Robles Cantero, Daniel and Brizuela Velasco, Aritza},
+  title  = {Evaluating Frontier Language Models on Clinician-Reviewed Dental Questions: A Reproducible Benchmark},
   year   = {2026},
   url    = {https://github.com/Tuminha/llm-evaluation-for-dentistry}
 }

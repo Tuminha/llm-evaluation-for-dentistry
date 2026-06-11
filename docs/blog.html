@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dental LLM Benchmark Summary</title>
+  <meta name="description" content="Plain-language summary of a clinician-reviewed benchmark of frontier language models on dental questions.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="topbar" aria-label="Report navigation">
+    <a class="brand" href="index.html" aria-label="Dental LLM Benchmark home">
+      <span class="brand-mark">D</span>
+      <span>Dental LLM Benchmark</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#leaderboard">Leaderboard</a>
+      <a href="index.html#questions">Questions</a>
+      <a href="index.html#errors">Errors</a>
+      <a href="index.html#reproduce">Reproduce</a>
+    </div>
+  </nav>
+
+  <main>
+    <article class="article">
+      <p class="section-kicker">Public summary</p>
+      <h1>Frontier LLMs are strong on dental questions, but the errors are clinically meaningful.</h1>
+      <p class="lede">
+        We evaluated eight current language models on 30 clinician-reviewed dental questions
+        spanning periodontology, implants, oral-systemic medicine, pharmacology, and patient
+        communication. The goal was not to declare a universal winner. The goal was to make
+        model behavior inspectable enough that dentists and researchers can judge where the
+        systems are useful, brittle, or dependent on the evaluator.
+      </p>
+
+      <section>
+        <h2>What we found</h2>
+        <p>
+          GPT-5.2 had the highest deployment accuracy in this run at 96.7%, followed by
+          Claude Opus 4.8 and GPT-5.5 at 93.3%, and Gemini 3.1 Pro at 90.0%. Those top
+          results should be read cautiously because the dataset is small and the bootstrap
+          intervals overlap.
+        </p>
+        <p>
+          The more useful signal is clinical. Incorrect rows clustered around periodontal
+          treatment thresholds, pharmacology safety nuance, peri-implant evidence
+          overstatement, diagnostic cutoffs, and patient communication omissions. One model,
+          Claude Fable 5, refused five answerable dental questions; refusals counted as
+          incorrect in the deployment metric.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why judge dependence matters</h2>
+        <p>
+          The primary judge was Claude Opus 4.8. We also ran GPT-5.2 and GPT-5.5 as
+          secondary judges on answered rows. Agreement with the primary judge was moderate:
+          81.7% to 83.8% verdict agreement, with Cohen's kappa from 0.506 to 0.524. That
+          is enough agreement to be informative, but not enough to treat a single automated
+          judge as ground truth.
+        </p>
+        <p>
+          The report therefore preserves the primary-judge endpoint and separately exposes
+          judge-consistency candidates for manual review. This is important for any dental
+          benchmark because small score differences can otherwise look more certain than
+          they really are.
+        </p>
+      </section>
+
+      <section>
+        <h2>What is released</h2>
+        <p>
+          The repository includes the benchmark questions, raw answer JSONL files, judge
+          verdicts, analysis scripts, LaTeX manuscript, PDF, visual summary infographic,
+          and this interactive report. The release is intended to be reproducible and
+          auditable rather than a closed leaderboard.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="index.html">Open interactive report</a>
+          <a class="button" href="assets/visual-summary.svg">Download infographic</a>
+          <a class="button" href="assets/dental-llm-benchmark.pdf">Read manuscript</a>
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <span>Dental LLM Benchmark</span>
+    <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry">GitHub repository</a>
+  </footer>
+</body>
+</html>

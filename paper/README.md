@@ -1,6 +1,6 @@
-# arXiv Draft Notes
+# arXiv Submission Notes
 
-This directory contains the first arXiv-oriented manuscript draft.
+This directory contains the arXiv-oriented manuscript source.
 
 ## Files
 
@@ -16,7 +16,7 @@ This directory contains the first arXiv-oriented manuscript draft.
 - Primary category: `cs.CL`
 - Secondary category: `cs.AI`
 - Optional secondary category: `cs.CY` only if the final framing emphasizes clinical deployment risk.
-- Comments: `8 pages, 2 figures; draft benchmark report`
+- Comments: `9 pages, 2 figures; benchmark report`
 
 ## Before Submission
 

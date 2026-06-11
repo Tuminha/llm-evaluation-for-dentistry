@@ -34,7 +34,7 @@ Universidad Europea Miguel de Cervantes\\
 \texttt{abrizuela@uemc.es}
 }
 
-\date{Draft of June 11, 2026}
+\date{June 11, 2026}
 
 \begin{document}
 
@@ -179,6 +179,22 @@ Qwen3.7 Plus showed strong performance for an efficient-tier model, with 83.3\% 
 \label{fig:accuracy-domain}
 \end{figure}
 
+\subsection{Clinical Error Analysis}
+
+To interpret errors beyond aggregate scores, we performed a post-hoc clinical review of the 44 model-question rows marked incorrect by the primary judge.
+This audit did not alter the headline metrics in Table~\ref{tab:results}, which remain the stored primary-judge verdicts.
+Excluding five refusals and five primary-judge internal-consistency candidates, 34 rows represented clear clinical answer errors.
+The clear clinical errors clustered into periodontal treatment endpoints and protocols (10 rows), pharmacology safety and guideline nuance (8 rows), peri-implant evidence overstatement or planning omissions (7 rows), periodontal diagnostic thresholds (6 rows), and patient-communication omissions (3 rows).
+A full row-level audit is included in the repository.
+
+The clearest clinical pattern was not absence of dental terminology.
+Many failed answers were fluent and detailed, but missed operational thresholds or overstated evidence beyond supported endpoints.
+For example, several models correctly linked keratinized mucosa around implants to plaque control, inflammation, recession, and brushing comfort, but then overstated the evidence by implying proven marginal-bone or survival benefit.
+Similarly, pharmacology failures often concerned safety-critical details: clindamycin persisted as a prophylaxis alternative despite the 2021 AHA change, and some answers advised dentists to alter DOAC dosing without consultation for routine extraction.
+
+The five primary-judge internal-consistency candidates were treated as adjudication flags rather than post-hoc corrections.
+Retaining them preserves reproducibility of the stored primary-judge endpoint, while showing why future versions should include prespecified manual adjudication for judge-disagreement and logically inconsistent verdicts.
+
 \subsection{Refusals and Empty Answers}
 
 Claude Fable 5 refused five of 30 questions.
@@ -209,8 +225,8 @@ The rubric-based design is intended to expose those omissions.
 
 At the same time, the method remains preliminary.
 The question set is small, the rubrics were reviewed by one periodontist, only one candidate-answer trial was used, and LLM-as-judge scoring is not a substitute for independent human adjudication.
-The secondary-judge passes quantify this problem rather than solve it.
-Future versions should expand the dataset, include multiple calibrated dental experts, use repeated trials, adjudicate disagreement rows manually, and separate knowledge recall, clinical reasoning, patient communication, and potential-harm scoring.
+The secondary-judge passes and internal-consistency audit quantify this problem rather than solve it.
+Future versions should expand the dataset, include multiple calibrated dental experts, use repeated trials, prespecify manual adjudication for judge-disagreement and internally inconsistent rows, and separate knowledge recall, clinical reasoning, patient communication, and potential-harm scoring.
 
 \section{Limitations}
 
@@ -219,7 +235,7 @@ The bootstrap intervals are consequently wide, and small accuracy differences sh
 Second, the final eight-model run used a single trial at temperature 0.
 Earlier five-model end-to-end runs showed at most a one-question per-model shift, but full eight-model run-to-run stability was not measured.
 Third, the primary ground truth is a single-clinician, guideline-checked rubric set rather than a multi-expert consensus panel.
-Fourth, all primary verdicts rely on an LLM judge, and secondary judges showed only moderate agreement with the primary judge.
+Fourth, all primary verdicts rely on an LLM judge, secondary judges showed only moderate agreement with the primary judge, and the post-hoc audit identified five internally inconsistent primary-judge verdicts.
 Fifth, the results reflect model availability, model versions, and OpenRouter routing on June 10--11, 2026.
 Model identifiers and behavior may drift.
 Finally, the benchmark evaluates text answers to simulated questions; it does not validate clinical deployment, patient outcomes, chairside decision support, or regulatory safety.
@@ -234,6 +250,7 @@ The repository commit containing the reported 240-row primary results file, both
 \begin{center}
 \texttt{416104585625b211732bd7355636fda8d625075f}
 \end{center}
+A post-hoc row-level clinical error audit is provided in \texttt{results/clinical\_error\_analysis.md}.
 
 \section{Ethics Statement}
 
