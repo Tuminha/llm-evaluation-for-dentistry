@@ -21,6 +21,6 @@ This directory contains the first arXiv-oriented manuscript draft.
 ## Before Submission
 
 1. Confirm final author affiliation, funding, competing-interest wording, acknowledgments, and author contributions.
-2. Push or archive the reviewed repository state, then insert the exact commit hash or DOI.
+2. Confirm the repository commit hash in `main.tex` still points to the intended public reproducibility snapshot.
 3. Rebuild `main.pdf` and inspect every page.
 4. Upload `arxiv_upload.zip` to arXiv and verify the processed PDF before final submission.
