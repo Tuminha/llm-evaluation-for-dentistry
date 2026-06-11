@@ -324,9 +324,9 @@ def build_infographic(models: list[dict], errors: dict) -> str:
         y = bar_base - bar_h
         color = model["color"]
         if idx == 0:
-            parts.append(f'<rect x="{x:.1f}" y="{y - 14:.1f}" width="{bar_w:.1f}" height="4" fill="#2E7D6F"/>')
+            parts.append(f'<rect x="{x:.1f}" y="{y - 9:.1f}" width="{bar_w:.1f}" height="3" fill="#2E7D6F"/>')
         parts.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{bar_w:.1f}" height="{bar_h:.1f}" rx="2" fill="{color}" opacity="0.88"/>')
-        parts.append(f'<text x="{x + bar_w / 2:.1f}" y="{y + 42:.1f}" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="26" font-weight="800" text-anchor="middle">{model["accuracy"]:.1f}</text>')
+        parts.append(f'<text x="{x + bar_w / 2:.1f}" y="{y - 18:.1f}" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="25" font-weight="500" text-anchor="middle">{model["accuracy"]:.1f}</text>')
         logo = logo_data_uri(model["provider"])
         parts.append(f'<circle cx="{x + bar_w / 2:.1f}" cy="{bar_base - 30}" r="26" fill="#FFFFFF" stroke="{color}" stroke-width="3"/>')
         parts.append(f'<image href="{logo}" x="{x + bar_w / 2 - 17:.1f}" y="{bar_base - 47}" width="34" height="34" preserveAspectRatio="xMidYMid meet"/>')
@@ -334,24 +334,34 @@ def build_infographic(models: list[dict], errors: dict) -> str:
         for line_idx, line in enumerate(label_lines[:2]):
             parts.append(f'<text x="{x + bar_w / 2:.1f}" y="{bar_base + 36 + line_idx * 24}" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="18" font-weight="700" text-anchor="middle">{line}</text>')
         if model["answer_rate"] < 100:
-            parts.append(f'<text x="{x + bar_w / 2:.1f}" y="{bar_base - 72}" fill="#9A6B1F" font-family="Menlo, Consolas, monospace" font-size="16" font-weight="800" text-anchor="middle">{model["answer_rate"]:.0f}% answered</text>')
+            parts.append(f'<text x="{x + bar_w / 2:.1f}" y="{y - 46:.1f}" fill="#9A6B1F" font-family="Menlo, Consolas, monospace" font-size="15" font-weight="500" text-anchor="middle">{model["answer_rate"]:.0f}% answered</text>')
 
+    # Right column: three provenance cards. SVG text does not wrap, so every body
+    # line is hand-set to fit the 364 px of usable card width at 16 px Menlo.
     card_x = 1080
+    tx = card_x + 28
+    body = 'font-family="Menlo, Consolas, monospace" font-size="16"'
+    title = 'font-family="Georgia, \'Times New Roman\', serif" font-size="24" font-weight="600"'
     parts.extend([
-        f'<rect x="{card_x}" y="220" width="420" height="210" rx="4" fill="#FFFFFF" stroke="#D7E2DD"/>',
-        f'<text x="{card_x + 28}" y="266" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="25" font-weight="800">Clinical error audit</text>',
-        f'<text x="{card_x + 28}" y="305" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="46" font-weight="900">{errors["clear_errors"]}</text>',
-        f'<text x="{card_x + 105}" y="302" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="20">clear clinical answer errors</text>',
-        f'<text x="{card_x + 28}" y="348" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="18">plus {len(errors["refusals"])} refusals and {len(errors["internal_candidates"])} judge-consistency flags</text>',
-        f'<text x="{card_x + 28}" y="388" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="18">Most common: treatment thresholds, pharmacology nuance, peri-implant evidence overstatement.</text>',
-        f'<rect x="{card_x}" y="460" width="420" height="170" rx="4" fill="#FFFFFF" stroke="#D7E2DD"/>',
-        f'<text x="{card_x + 28}" y="506" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="25" font-weight="800">Judge dependence</text>',
-        f'<text x="{card_x + 28}" y="548" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="22" font-weight="800">81.7-83.8% verdict agreement</text>',
-        f'<text x="{card_x + 28}" y="586" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="18">GPT-5.2 and GPT-5.5 second-judge passes showed moderate agreement with Claude Opus 4.8.</text>',
-        f'<rect x="{card_x}" y="660" width="420" height="110" rx="4" fill="#1C2B30"/>',
-        f'<text x="{card_x + 28}" y="704" fill="#FFFFFF" font-family="Menlo, Consolas, monospace" font-size="24" font-weight="800">Reproducible release</text>',
-        f'<text x="{card_x + 28}" y="740" fill="#C9D1D9" font-family="Menlo, Consolas, monospace" font-size="18">Raw answers, rubrics, judge verdicts, scripts, paper, and this report are public.</text>',
-        '<text x="90" y="842" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="18">Source: github.com/Tuminha/llm-evaluation-for-dentistry · Data commit 4161045 · June 2026</text>',
+        f'<rect x="{card_x}" y="220" width="420" height="240" rx="4" fill="#FFFFFF" stroke="#D7E2DD"/>',
+        f'<text x="{tx}" y="258" fill="#1C2B30" {title}>Clinical error audit</text>',
+        f'<text x="{tx}" y="318" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="46" font-weight="500">{errors["clear_errors"]}</text>',
+        f'<text x="{tx + 77}" y="318" fill="#52646A" {body}>clear clinical answer errors</text>',
+        f'<text x="{tx}" y="354" fill="#52646A" {body}>plus {len(errors["refusals"])} refusals and {len(errors["internal_candidates"])} judge flags.</text>',
+        f'<text x="{tx}" y="380" fill="#52646A" {body}>Most common: treatment thresholds,</text>',
+        f'<text x="{tx}" y="406" fill="#52646A" {body}>pharmacology nuance, peri-implant</text>',
+        f'<text x="{tx}" y="432" fill="#52646A" {body}>evidence overstatement.</text>',
+        f'<rect x="{card_x}" y="486" width="420" height="176" rx="4" fill="#FFFFFF" stroke="#D7E2DD"/>',
+        f'<text x="{tx}" y="524" fill="#1C2B30" {title}>Judge dependence</text>',
+        f'<text x="{tx}" y="558" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="20" font-weight="500">81.7–83.8% verdict agreement</text>',
+        f'<text x="{tx}" y="590" fill="#52646A" {body}>GPT-5.2 and GPT-5.5 second-judge</text>',
+        f'<text x="{tx}" y="616" fill="#52646A" {body}>passes agreed moderately with the</text>',
+        f'<text x="{tx}" y="642" fill="#52646A" {body}>Claude Opus 4.8 primary judge.</text>',
+        f'<rect x="{card_x}" y="688" width="420" height="118" rx="4" fill="#1C2B30"/>',
+        f'<text x="{tx}" y="726" fill="#FFFFFF" {title}>Reproducible release</text>',
+        f'<text x="{tx}" y="756" fill="#C9D5D1" {body}>Raw answers, rubrics, judge verdicts,</text>',
+        f'<text x="{tx}" y="782" fill="#C9D5D1" {body}>scripts, paper — all public.</text>',
+        '<text x="90" y="856" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="16">Source: github.com/Tuminha/llm-evaluation-for-dentistry · Data commit 4161045 · June 2026</text>',
     ])
     parts.append("</svg>")
     return "\n".join(parts)
