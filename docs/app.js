@@ -42,7 +42,7 @@ function animateCount(el) {
 
 function revealSection(container) {
   revealedSections.add(container.id);
-  container.querySelectorAll(".infographic").forEach((img) => img.classList.add("is-in"));
+  if (container.classList.contains("infographic")) container.classList.add("is-in");
   container.querySelectorAll("[data-count]").forEach(animateCount);
   container.querySelectorAll(".bar-fill[data-w]").forEach((bar, i) => {
     bar.style.transitionDelay = reduceMotion ? "0ms" : `${Math.min(i * 60, 420)}ms`;
@@ -101,7 +101,7 @@ function init() {
   renderMetrics();
   buildControls();
   renderAll();
-  armSection(byId("infographic"));
+  armSection(byId("infographicImg"));
   initScrollEffects();
   byId("questionSearch").addEventListener("input", (event) => {
     state.query = event.target.value.trim().toLowerCase();

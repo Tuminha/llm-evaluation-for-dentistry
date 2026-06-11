@@ -543,8 +543,8 @@ select:disabled, input:disabled { opacity: 0.5; cursor: not-allowed; }
   height: auto;
   border: var(--rule-hairline);
   opacity: 0;
-  transform: translateY(16px) scale(0.97);
-  transition: opacity 640ms var(--ease-out), transform 640ms var(--ease-out);
+  transform: translateY(28px) scale(0.95);
+  transition: opacity 760ms var(--ease-out), transform 760ms var(--ease-out);
 }
 
 .infographic.is-in { opacity: 1; transform: none; }
