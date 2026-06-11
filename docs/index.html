@@ -3,69 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dental LLM Benchmark Interactive Report</title>
+  <title>Dental LLM Benchmark — Interactive Report</title>
   <meta name="description" content="Interactive report for a clinician-reviewed dental LLM benchmark with model results, clinical error analysis, and judge agreement.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="site-header">
-    <nav class="topbar" aria-label="Report navigation">
-      <a class="brand" href="#top" aria-label="Dental LLM Benchmark home">
-        <span class="brand-mark">D</span>
-        <span>Dental LLM Benchmark</span>
-      </a>
-      <div class="nav-links">
-        <a href="#leaderboard">Leaderboard</a>
-        <a href="#questions">Questions</a>
-        <a href="#errors">Errors</a>
-        <a href="#reproduce">Reproduce</a>
-        <a href="blog.html">Blog</a>
-      </div>
-    </nav>
-    <section id="top" class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">Clinician-reviewed specialty benchmark</p>
-        <h1>Which frontier LLMs can answer dental questions safely?</h1>
-        <p class="lede">
-          A public benchmark of 30 open-ended dental questions across periodontology,
-          implants, oral-systemic medicine, pharmacology, and patient communication.
-          Every answer, rubric, judge verdict, and analysis script is released.
-        </p>
-        <div class="hero-actions">
-          <a class="button primary" href="#leaderboard">Explore results</a>
-          <a class="button" href="assets/dental-llm-benchmark.pdf">Read PDF</a>
-          <a class="button" href="blog.html">Read summary</a>
-          <a class="button" href="assets/visual-summary.svg">Open infographic</a>
-        </div>
-      </div>
-      <div class="hero-panel" aria-label="Benchmark summary metrics">
-        <div class="metric-grid" id="metricGrid"></div>
-      </div>
-    </section>
+  <a class="skip-link" href="#leaderboard">Skip to the leaderboard</a>
+
+  <header class="masthead">
+    <a class="wordmark" href="#top">Dental LLM Benchmark</a>
+    <a class="masthead-link" href="assets/dental-llm-benchmark.pdf">Paper (PDF) ↗</a>
   </header>
+
+  <section id="top" class="stat-hero" aria-labelledby="hero-qualifier">
+    <p class="hero-figure" aria-hidden="true"><span id="heroFigure" data-target="96.7">96.7</span><span class="unit">%</span></p>
+    <h1 id="hero-qualifier" class="qualifier">The best score on 30 clinician-reviewed dental questions. The intervals overlap — the ranking is not the story.</h1>
+    <p class="hero-meta">
+      Eight frontier models answered open-ended questions across periodontology, implants,
+      oral-systemic medicine, pharmacology, and patient communication. Every answer, rubric,
+      and judge verdict is public.
+      <a href="blog.html">Plain-language summary</a> · <a href="#questions">The questions</a> ·
+      <a href="#judges">Judge agreement</a> · <a href="#reproduce">Reproduce it</a>
+    </p>
+    <a class="cta-chip" href="#leaderboard">Explore the leaderboard ↓</a>
+    <div class="stat-strip" id="metricGrid"></div>
+  </section>
 
   <main>
     <section class="section intro-grid" aria-labelledby="report-summary-title">
-      <div>
-        <p class="section-kicker">Takeaway</p>
-        <h2 id="report-summary-title">The useful signal is clinical, not just numerical.</h2>
+      <div class="prose">
+        <h2 id="report-summary-title">The useful signal is clinical, not numerical.</h2>
         <p>
           The top frontier systems are close on a 30-question dataset. The more important
-          distinction is where answers fail: thresholds, guideline nuance, overstatement of
-          evidence, refusals, and judge inconsistency.
+          distinction is where answers fail: treatment thresholds, guideline nuance,
+          overstatement of evidence, refusals, and judge inconsistency.
         </p>
       </div>
-      <div class="callout">
+      <p class="aside-note">
         <strong>Read this as a reproducible benchmark report.</strong>
-        <span>Small score gaps are noisy; all headline metrics preserve the stored primary-judge endpoint.</span>
-      </div>
+        Small score gaps are noisy; every headline metric preserves the stored
+        primary-judge endpoint, and the raw files are one click away.
+      </p>
     </section>
 
     <section class="section" id="leaderboard" aria-labelledby="leaderboard-title">
       <div class="section-head">
         <div>
-          <p class="section-kicker">Interactive leaderboard</p>
           <h2 id="leaderboard-title">Deployment accuracy by model</h2>
+          <p class="section-note">Refusals count as incorrect. Select a model for its full record; filter by domain, tier, or provider.</p>
         </div>
         <div class="control-row" aria-label="Leaderboard filters">
           <label>
@@ -83,7 +72,7 @@
         </div>
       </div>
       <div class="leaderboard-layout">
-        <div class="leaderboard-card">
+        <div>
           <div id="leaderboardRows" class="leaderboard-rows"></div>
         </div>
         <aside class="detail-card" id="modelDetail" aria-live="polite"></aside>
@@ -93,8 +82,8 @@
     <section class="section" aria-labelledby="domain-title">
       <div class="section-head">
         <div>
-          <p class="section-kicker">Domain view</p>
-          <h2 id="domain-title">Model performance changes by clinical domain</h2>
+          <h2 id="domain-title">Performance shifts by clinical domain</h2>
+          <p class="section-note">Accuracy per domain, five questions each. Pharmacology separates the field.</p>
         </div>
       </div>
       <div class="matrix-wrap" id="domainMatrix"></div>
@@ -103,26 +92,30 @@
     <section class="section" id="questions" aria-labelledby="questions-title">
       <div class="section-head">
         <div>
-          <p class="section-kicker">Question explorer</p>
-          <h2 id="questions-title">Inspect the 30 clinical questions</h2>
+          <h2 id="questions-title">The 30 clinical questions</h2>
+          <p class="section-note">Each dot is one model's outcome on that question.</p>
         </div>
         <div class="control-row">
           <label>
             Search
-            <input id="questionSearch" type="search" placeholder="e.g. anticoagulant, implant, smoking">
+            <input id="questionSearch" type="search" placeholder="anticoagulant, implant, smoking…">
           </label>
         </div>
       </div>
       <div class="question-grid" id="questionGrid"></div>
+      <p class="legend" aria-hidden="true">
+        <span><span class="dot correct"></span> correct</span>
+        <span><span class="dot wrong"></span> incorrect</span>
+        <span><span class="dot refusal"></span> refusal</span>
+      </p>
     </section>
 
     <section class="section" id="errors" aria-labelledby="errors-title">
       <div class="section-head">
         <div>
-          <p class="section-kicker">Clinical error analysis</p>
           <h2 id="errors-title">What the wrong answers got wrong</h2>
+          <p class="section-note">A clinical reading of every incorrect row — <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/results/clinical_error_analysis.md">full audit file ↗</a></p>
         </div>
-        <a class="button" href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/results/clinical_error_analysis.md">Full audit file</a>
       </div>
       <div class="error-layout">
         <div class="error-card">
@@ -132,9 +125,9 @@
         <div class="error-card">
           <h3>Judge consistency flags</h3>
           <p>
-            These rows were stored as incorrect even though the primary judge marked all criteria
-            satisfied and no violations. They are shown as manual-adjudication candidates, not
-            retroactive corrections.
+            Rows stored as incorrect although the primary judge marked every criterion
+            satisfied and no violations — shown as manual-adjudication candidates,
+            not retroactive corrections.
           </p>
           <div id="judgeFlags"></div>
         </div>
@@ -144,8 +137,8 @@
     <section class="section" id="judges" aria-labelledby="judges-title">
       <div class="section-head">
         <div>
-          <p class="section-kicker">Judge dependence</p>
           <h2 id="judges-title">Secondary judges expose scoring uncertainty</h2>
+          <p class="section-note">Every stored answer was re-scored by two independent judges. Absolute accuracy is judge-dependent; the ranking is stable.</p>
         </div>
       </div>
       <div class="judge-grid" id="judgeCards"></div>
@@ -155,50 +148,53 @@
     <section class="section" id="infographic" aria-labelledby="infographic-title">
       <div class="section-head">
         <div>
-          <p class="section-kicker">Shareable visual summary</p>
-          <h2 id="infographic-title">Infographic generated from the benchmark data</h2>
+          <h2 id="infographic-title">The one-image version</h2>
+          <p class="section-note">Generated deterministically from the benchmark data — <a href="assets/visual-summary.svg" download>download the SVG ↗</a></p>
         </div>
-        <a class="button" href="assets/visual-summary.svg">Download SVG</a>
       </div>
       <img class="infographic" src="assets/visual-summary.svg" alt="Visual summary of the dental LLM benchmark results and clinical error audit.">
     </section>
 
     <section class="section reproduce" id="reproduce" aria-labelledby="reproduce-title">
-      <div>
-        <p class="section-kicker">Reproducibility</p>
-        <h2 id="reproduce-title">Source materials, scripts, citation, and license</h2>
+      <div class="prose">
+        <h2 id="reproduce-title">Reproduce it</h2>
         <p>
-          The repository includes the question dataset, raw JSONL answer transcripts, judge
-          verdict files, plotting scripts, manuscript source, and this report generator.
+          The repository carries the question dataset, raw JSONL answer transcripts, judge
+          verdict files, analysis scripts, manuscript source, and this report's generator.
+          One command rebuilds every table.
         </p>
-      </div>
-      <div class="resource-grid">
-        <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/data/dental_qa.json">Question dataset</a>
-        <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/results/results.jsonl">Primary results JSONL</a>
-        <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/results/results_judge2.jsonl">GPT-5.2 judge pass</a>
-        <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/results/results_judge_gpt55.jsonl">GPT-5.5 judge pass</a>
-        <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/paper/main.tex">LaTeX manuscript</a>
-        <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/LICENSE">MIT license</a>
-        <a href="blog.html">Blog summary</a>
-      </div>
-      <div class="citation-box">
-        <button id="copyCitation" class="button small" type="button">Copy BibTeX</button>
-        <pre id="citationText">@misc{teixeirabarbosa_dental_llm_benchmark_2026,
+        <div class="citation-box">
+          <button id="copyCitation" class="copy-btn" type="button">Copy BibTeX</button>
+          <pre id="citationText">@misc{teixeirabarbosa_dental_llm_benchmark_2026,
   author = {Teixeira Barbosa, Francisco and Robles Cantero, Daniel and Brizuela Velasco, Aritza},
   title  = {Evaluating Frontier Language Models on Clinician-Reviewed Dental Questions: A Reproducible Benchmark},
   year   = {2026},
   url    = {https://github.com/Tuminha/llm-evaluation-for-dentistry}
 }</pre>
+        </div>
       </div>
+      <ul class="resource-list">
+        <li><a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/data/dental_qa.json">Question dataset</a></li>
+        <li><a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/results/results.jsonl">Primary results JSONL</a></li>
+        <li><a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/results/results_judge2.jsonl">GPT-5.2 judge pass</a></li>
+        <li><a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/results/results_judge_gpt55.jsonl">GPT-5.5 judge pass</a></li>
+        <li><a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/src/analysis.py">Analysis script</a></li>
+        <li><a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/paper/main.tex">LaTeX manuscript</a></li>
+        <li><a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/LICENSE">MIT license</a></li>
+      </ul>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <span>Data commit <code id="dataCommit"></code></span>
-    <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry">GitHub repository</a>
+  <footer class="colophon">
+    Evaluating Frontier Language Models on Clinician-Reviewed Dental Questions ·
+    Teixeira Barbosa, Robles Cantero, Brizuela Velasco · June 2026<br>
+    Data commit <code id="dataCommit"></code> · 240 primary rows · 470 secondary judge verdicts ·
+    built by <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry/blob/main/src/build_pages.py">src/build_pages.py</a>
+    from the committed JSONL files · MIT ·
+    <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry">github.com/Tuminha/llm-evaluation-for-dentistry</a>
   </footer>
 
-  <script src="report-data.js?v=20260611b"></script>
-  <script src="app.js?v=20260611b"></script>
+  <script src="report-data.js?v=20260611c"></script>
+  <script src="app.js?v=20260611c"></script>
 </body>
 </html>

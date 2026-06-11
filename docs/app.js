@@ -18,6 +18,7 @@ const escapeHtml = (value) => String(value)
 
 function init() {
   byId("dataCommit").textContent = data.meta.data_commit.slice(0, 7);
+  renderHeroFigure();
   renderMetrics();
   buildControls();
   renderAll();
@@ -33,12 +34,31 @@ function init() {
   });
 }
 
+function renderHeroFigure() {
+  // Stat-Led hero reveal: tick the figure from 0 to the live top score (~500 ms).
+  const el = byId("heroFigure");
+  const target = defaultModel()?.accuracy ?? parseFloat(el.dataset.target);
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    el.textContent = target.toFixed(1);
+    return;
+  }
+  const start = performance.now();
+  const dur = 500;
+  const tick = (now) => {
+    const t = Math.min((now - start) / dur, 1);
+    el.textContent = (target * (1 - Math.pow(1 - t, 3))).toFixed(1);
+    if (t < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
 function renderMetrics() {
+  const judgeVerdicts = data.overall.rows + data.judge_agreement.reduce((sum, judge) => sum + judge.paired, 0);
   const items = [
-    [data.overall.models, "models evaluated"],
+    [data.overall.models, "frontier models"],
     [data.overall.questions, "clinician-reviewed questions"],
-    [fmtPct(data.overall.accuracy), "primary-judge accuracy across all rows"],
-    [data.error_analysis.internal_candidates.length, "judge consistency candidates"],
+    [judgeVerdicts, "judge verdicts recorded"],
+    [data.overall.refusals, "refusals, all labeled"],
   ];
   byId("metricGrid").innerHTML = items.map(([value, label]) => `
     <div class="metric">
@@ -118,7 +138,7 @@ function renderLeaderboard() {
         <img class="logo" src="${escapeHtml(model.logo)}" alt="${escapeHtml(model.provider)} logo">
         <span>
           <strong>${escapeHtml(model.model)}</strong>
-          <span>${escapeHtml(model.provider)} - ${escapeHtml(titleCase(model.tier))}</span>
+          <span>${escapeHtml(model.provider)} · ${escapeHtml(titleCase(model.tier))}</span>
         </span>
       </span>
       <span class="bar-track" aria-hidden="true">
@@ -156,7 +176,7 @@ function renderModelDetail() {
     </div>
     <div class="detail-list">
       <div><span>Deployment accuracy</span><strong>${fmtPct(model.accuracy)} (${model.correct}/${model.total})</strong></div>
-      <div><span>Bootstrap interval</span><strong>${model.ci_low.toFixed(1)}-${model.ci_high.toFixed(1)}%</strong></div>
+      <div><span>Bootstrap interval</span><strong>${model.ci_low.toFixed(1)}–${model.ci_high.toFixed(1)}%</strong></div>
       <div><span>Answer rate</span><strong>${fmtPct(model.answer_rate)}</strong></div>
       <div><span>Accuracy on answered</span><strong>${fmtPct(model.answered_accuracy)}</strong></div>
       <div><span>Mean latency</span><strong>${model.latency.toFixed(1)} s</strong></div>
@@ -188,12 +208,13 @@ function renderMatrix() {
   `;
 }
 
+// Functional data ramp mirroring tokens.css --color-ok / --color-warn / --color-bad.
 function heatColor(value) {
-  if (value >= 90) return "#0f8f83";
-  if (value >= 75) return "#4f9f79";
-  if (value >= 60) return "#b7791f";
-  if (value >= 40) return "#d97842";
-  return "#cf4a3c";
+  if (value >= 90) return "#2e7d6f";
+  if (value >= 75) return "#5a9a8a";
+  if (value >= 60) return "#bd8d3c";
+  if (value >= 40) return "#c2703f";
+  return "#b14a3a";
 }
 
 function renderQuestions() {
@@ -246,8 +267,8 @@ function renderErrors() {
 
   byId("judgeFlags").innerHTML = data.error_analysis.internal_candidates.map((flag) => `
     <div class="flag-row">
-      <span><strong>${escapeHtml(flag.model)}</strong><br><span class="muted">${escapeHtml(flag.qid)} - ${escapeHtml(flag.domain)}</span></span>
-      <span class="chip">GPT-5.2 ${flag.gpt52 ? "correct" : "incorrect"} / GPT-5.5 ${flag.gpt55 ? "correct" : "incorrect"}</span>
+      <span><strong>${escapeHtml(flag.model)}</strong><br><span class="muted">${escapeHtml(flag.qid)} · ${escapeHtml(flag.domain)}</span></span>
+      <span class="chip">GPT-5.2 ${flag.gpt52 ? "correct" : "incorrect"} · GPT-5.5 ${flag.gpt55 ? "correct" : "incorrect"}</span>
     </div>
   `).join("");
 }

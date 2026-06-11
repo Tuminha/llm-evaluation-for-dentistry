@@ -2,7 +2,7 @@ window.REPORT_DATA = {
   "meta": {
     "title": "Evaluating Frontier Language Models on Clinician-Reviewed Dental Questions",
     "subtitle": "A reproducible specialty benchmark for dental LLM evaluation",
-    "generated_at": "2026-06-11T15:40:58.888865+00:00",
+    "generated_at": "2026-06-11T16:00:41.022500+00:00",
     "repo_url": "https://github.com/Tuminha/llm-evaluation-for-dentistry",
     "pages_url": "https://tuminha.github.io/llm-evaluation-for-dentistry/",
     "data_commit": "416104585625b211732bd7355636fda8d625075f",

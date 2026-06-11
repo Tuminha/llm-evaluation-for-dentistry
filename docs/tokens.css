@@ -1,0 +1,46 @@
+/* Hallmark · genre: editorial · macrostructure: Stat-Led · theme: custom (Periospot teal anchor)
+ * H4 Stat-Led knobs: number=monospace, qualifier=below, secondary=row-of-four
+ * nav: N9 edge-aligned · footer: Ft4 dense colophon · enrichment: none
+ * pre-emit critique: P4 H5 E4 S5 R5 V4
+ */
+:root {
+  /* paper + ink — tinted toward the teal anchor, never pure */
+  --color-paper:    oklch(97.5% 0.006 190);
+  --color-paper-2:  oklch(95.5% 0.009 190);
+  --color-ink:      oklch(24% 0.02 210);
+  --color-ink-2:    oklch(45% 0.018 205);
+  --color-rule:     oklch(87% 0.014 190);
+  --color-rule-2:   oklch(80% 0.02 190);
+
+  /* single accent — the repo's teal, used sparingly */
+  --color-accent:      oklch(52% 0.085 192);
+  --color-accent-ink:  oklch(98% 0.005 190);
+  --color-focus:       oklch(52% 0.085 192);
+
+  /* data encodings (functional, charts + dots only) */
+  --color-ok:    oklch(56% 0.09 175);
+  --color-bad:   oklch(54% 0.14 28);
+  --color-warn:  oklch(66% 0.11 70);
+
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --space-3xs: 0.25rem; --space-2xs: 0.5rem; --space-xs: 0.75rem;
+  --space-sm: 1rem;     --space-md: 1.5rem;  --space-lg: 2rem;
+  --space-xl: 3rem;     --space-2xl: 4.5rem; --space-3xl: 7rem;
+
+  --text-xs: 0.75rem;  --text-sm: 0.875rem; --text-base: 1.0625rem;
+  --text-md: 1.125rem; --text-lg: 1.375rem; --text-xl: 1.75rem;
+  --text-2xl: clamp(1.6rem, 1.2rem + 1.6vw, 2.4rem);
+  --text-display: clamp(2.1rem, 1.5rem + 2.6vw, 3.4rem);
+  --text-figure: clamp(4.5rem, 2.5rem + 11vw, 11rem);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-short: 220ms;
+
+  --rule-hairline: 1px solid var(--color-rule);
+  --rule-strong: 2px solid var(--color-ink);
+  --radius-input: 2px;
+  --measure: 64ch;
+}

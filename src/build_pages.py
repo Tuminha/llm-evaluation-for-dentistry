@@ -312,10 +312,10 @@ def build_infographic(models: list[dict], errors: dict) -> str:
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
         '<title id="title">Dental LLM benchmark visual summary</title>',
         '<desc id="desc">Leaderboard, clinical error analysis, and judge agreement summary from a 30-question dental LLM benchmark.</desc>',
-        '<rect width="1600" height="900" fill="#F6F8F7"/>',
-        '<text x="90" y="88" fill="#17202A" font-family="Inter, Arial, sans-serif" font-size="52" font-weight="800">Which LLMs can a dentist trust?</text>',
-        '<text x="90" y="132" fill="#566070" font-family="Inter, Arial, sans-serif" font-size="24">30 clinician-reviewed dental questions - 8 frontier models - rubric-based judging</text>',
-        '<text x="90" y="172" fill="#6B7280" font-family="Inter, Arial, sans-serif" font-size="18">Deployment accuracy; refusals count as incorrect. Top-model intervals overlap, so small ranking gaps should be treated cautiously.</text>',
+        '<rect width="1600" height="900" fill="#F7FAF8"/>',
+        '<text x="90" y="88" fill="#1C2B30" font-family="Georgia, \'Times New Roman\', serif" font-size="52" font-weight="600">Which LLMs can a dentist trust?</text>',
+        '<text x="90" y="132" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="22">30 clinician-reviewed dental questions · 8 frontier models · rubric-based judging</text>',
+        '<text x="90" y="172" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="17">Deployment accuracy; refusals count as incorrect. Top-model intervals overlap — treat small ranking gaps cautiously.</text>',
     ]
 
     for idx, model in enumerate(models):
@@ -324,34 +324,34 @@ def build_infographic(models: list[dict], errors: dict) -> str:
         y = bar_base - bar_h
         color = model["color"]
         if idx == 0:
-            parts.append(f'<rect x="{x - 8:.1f}" y="{y - 16:.1f}" width="{bar_w + 16:.1f}" height="{bar_h + 32:.1f}" fill="none" stroke="#E05A5A" stroke-width="5"/>')
-        parts.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{bar_w:.1f}" height="{bar_h:.1f}" rx="12" fill="{color}" opacity="0.84"/>')
-        parts.append(f'<text x="{x + bar_w / 2:.1f}" y="{y + 42:.1f}" fill="#17202A" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="800" text-anchor="middle">{model["accuracy"]:.1f}</text>')
+            parts.append(f'<rect x="{x:.1f}" y="{y - 14:.1f}" width="{bar_w:.1f}" height="4" fill="#2E7D6F"/>')
+        parts.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{bar_w:.1f}" height="{bar_h:.1f}" rx="2" fill="{color}" opacity="0.88"/>')
+        parts.append(f'<text x="{x + bar_w / 2:.1f}" y="{y + 42:.1f}" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="26" font-weight="800" text-anchor="middle">{model["accuracy"]:.1f}</text>')
         logo = logo_data_uri(model["provider"])
         parts.append(f'<circle cx="{x + bar_w / 2:.1f}" cy="{bar_base - 30}" r="26" fill="#FFFFFF" stroke="{color}" stroke-width="3"/>')
         parts.append(f'<image href="{logo}" x="{x + bar_w / 2 - 17:.1f}" y="{bar_base - 47}" width="34" height="34" preserveAspectRatio="xMidYMid meet"/>')
         label_lines = model["model"].replace("Claude ", "Claude|").replace("Gemini ", "Gemini|").replace("Llama 4 ", "Llama 4|").replace("DeepSeek ", "DeepSeek|").replace("Qwen3.7 ", "Qwen3.7|").split("|")
         for line_idx, line in enumerate(label_lines[:2]):
-            parts.append(f'<text x="{x + bar_w / 2:.1f}" y="{bar_base + 36 + line_idx * 24}" fill="#1F2937" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">{line}</text>')
+            parts.append(f'<text x="{x + bar_w / 2:.1f}" y="{bar_base + 36 + line_idx * 24}" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="18" font-weight="700" text-anchor="middle">{line}</text>')
         if model["answer_rate"] < 100:
-            parts.append(f'<text x="{x + bar_w / 2:.1f}" y="{bar_base - 72}" fill="#8A4B00" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="800" text-anchor="middle">{model["answer_rate"]:.0f}% answered</text>')
+            parts.append(f'<text x="{x + bar_w / 2:.1f}" y="{bar_base - 72}" fill="#9A6B1F" font-family="Menlo, Consolas, monospace" font-size="16" font-weight="800" text-anchor="middle">{model["answer_rate"]:.0f}% answered</text>')
 
     card_x = 1080
     parts.extend([
-        f'<rect x="{card_x}" y="220" width="420" height="210" rx="18" fill="#FFFFFF" stroke="#DCE4DF"/>',
-        f'<text x="{card_x + 28}" y="266" fill="#17202A" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="800">Clinical error audit</text>',
-        f'<text x="{card_x + 28}" y="305" fill="#1F2937" font-family="Inter, Arial, sans-serif" font-size="46" font-weight="900">{errors["clear_errors"]}</text>',
-        f'<text x="{card_x + 105}" y="302" fill="#566070" font-family="Inter, Arial, sans-serif" font-size="20">clear clinical answer errors</text>',
-        f'<text x="{card_x + 28}" y="348" fill="#566070" font-family="Inter, Arial, sans-serif" font-size="18">plus {len(errors["refusals"])} refusals and {len(errors["internal_candidates"])} judge-consistency flags</text>',
-        f'<text x="{card_x + 28}" y="388" fill="#566070" font-family="Inter, Arial, sans-serif" font-size="18">Most common: treatment thresholds, pharmacology nuance, peri-implant evidence overstatement.</text>',
-        f'<rect x="{card_x}" y="460" width="420" height="170" rx="18" fill="#FFFFFF" stroke="#DCE4DF"/>',
-        f'<text x="{card_x + 28}" y="506" fill="#17202A" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="800">Judge dependence</text>',
-        f'<text x="{card_x + 28}" y="548" fill="#1F2937" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">81.7-83.8% verdict agreement</text>',
-        f'<text x="{card_x + 28}" y="586" fill="#566070" font-family="Inter, Arial, sans-serif" font-size="18">GPT-5.2 and GPT-5.5 second-judge passes showed moderate agreement with Claude Opus 4.8.</text>',
-        f'<rect x="{card_x}" y="660" width="420" height="110" rx="18" fill="#17202A"/>',
-        f'<text x="{card_x + 28}" y="704" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="800">Reproducible release</text>',
-        f'<text x="{card_x + 28}" y="740" fill="#C9D1D9" font-family="Inter, Arial, sans-serif" font-size="18">Raw answers, rubrics, judge verdicts, scripts, paper, and this report are public.</text>',
-        '<text x="90" y="842" fill="#566070" font-family="Inter, Arial, sans-serif" font-size="18">Source: github.com/Tuminha/llm-evaluation-for-dentistry - Data commit 4161045 - June 2026</text>',
+        f'<rect x="{card_x}" y="220" width="420" height="210" rx="4" fill="#FFFFFF" stroke="#D7E2DD"/>',
+        f'<text x="{card_x + 28}" y="266" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="25" font-weight="800">Clinical error audit</text>',
+        f'<text x="{card_x + 28}" y="305" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="46" font-weight="900">{errors["clear_errors"]}</text>',
+        f'<text x="{card_x + 105}" y="302" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="20">clear clinical answer errors</text>',
+        f'<text x="{card_x + 28}" y="348" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="18">plus {len(errors["refusals"])} refusals and {len(errors["internal_candidates"])} judge-consistency flags</text>',
+        f'<text x="{card_x + 28}" y="388" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="18">Most common: treatment thresholds, pharmacology nuance, peri-implant evidence overstatement.</text>',
+        f'<rect x="{card_x}" y="460" width="420" height="170" rx="4" fill="#FFFFFF" stroke="#D7E2DD"/>',
+        f'<text x="{card_x + 28}" y="506" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="25" font-weight="800">Judge dependence</text>',
+        f'<text x="{card_x + 28}" y="548" fill="#1C2B30" font-family="Menlo, Consolas, monospace" font-size="22" font-weight="800">81.7-83.8% verdict agreement</text>',
+        f'<text x="{card_x + 28}" y="586" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="18">GPT-5.2 and GPT-5.5 second-judge passes showed moderate agreement with Claude Opus 4.8.</text>',
+        f'<rect x="{card_x}" y="660" width="420" height="110" rx="4" fill="#1C2B30"/>',
+        f'<text x="{card_x + 28}" y="704" fill="#FFFFFF" font-family="Menlo, Consolas, monospace" font-size="24" font-weight="800">Reproducible release</text>',
+        f'<text x="{card_x + 28}" y="740" fill="#C9D1D9" font-family="Menlo, Consolas, monospace" font-size="18">Raw answers, rubrics, judge verdicts, scripts, paper, and this report are public.</text>',
+        '<text x="90" y="842" fill="#52646A" font-family="Menlo, Consolas, monospace" font-size="18">Source: github.com/Tuminha/llm-evaluation-for-dentistry · Data commit 4161045 · June 2026</text>',
     ])
     parts.append("</svg>")
     return "\n".join(parts)

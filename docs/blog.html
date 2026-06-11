@@ -3,28 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dental LLM Benchmark Summary</title>
+  <title>Dental LLM Benchmark — Summary</title>
   <meta name="description" content="Plain-language summary of a clinician-reviewed benchmark of frontier language models on dental questions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <nav class="topbar" aria-label="Report navigation">
-    <a class="brand" href="index.html" aria-label="Dental LLM Benchmark home">
-      <span class="brand-mark">D</span>
-      <span>Dental LLM Benchmark</span>
-    </a>
-    <div class="nav-links">
-      <a href="index.html#leaderboard">Leaderboard</a>
-      <a href="index.html#questions">Questions</a>
-      <a href="index.html#errors">Errors</a>
-      <a href="index.html#reproduce">Reproduce</a>
-    </div>
-  </nav>
+  <header class="masthead">
+    <a class="wordmark" href="index.html">Dental LLM Benchmark</a>
+    <a class="masthead-link" href="index.html#leaderboard">Interactive report ↗</a>
+  </header>
 
   <main>
     <article class="article">
-      <p class="section-kicker">Public summary</p>
-      <h1>Frontier LLMs are strong on dental questions, but the errors are clinically meaningful.</h1>
+      <h1>Frontier LLMs are strong on dental questions — but the errors are clinically meaningful.</h1>
       <p class="lede">
         We evaluated eight current language models on 30 clinician-reviewed dental questions
         spanning periodontology, implants, oral-systemic medicine, pharmacology, and patient
@@ -72,21 +67,22 @@
         <p>
           The repository includes the benchmark questions, raw answer JSONL files, judge
           verdicts, analysis scripts, LaTeX manuscript, PDF, visual summary infographic,
-          and this interactive report. The release is intended to be reproducible and
+          and the interactive report. The release is intended to be reproducible and
           auditable rather than a closed leaderboard.
         </p>
-        <div class="hero-actions">
-          <a class="button primary" href="index.html">Open interactive report</a>
-          <a class="button" href="assets/visual-summary.svg">Download infographic</a>
-          <a class="button" href="assets/dental-llm-benchmark.pdf">Read manuscript</a>
-        </div>
+        <a class="cta-chip" href="index.html">Open the interactive report ↓</a>
+        <p class="post-links">
+          Also: <a href="assets/dental-llm-benchmark.pdf">the manuscript (PDF)</a> ·
+          <a href="assets/visual-summary.svg">the one-image summary (SVG)</a>
+        </p>
       </section>
     </article>
   </main>
 
-  <footer class="site-footer">
-    <span>Dental LLM Benchmark</span>
-    <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry">GitHub repository</a>
+  <footer class="colophon">
+    Evaluating Frontier Language Models on Clinician-Reviewed Dental Questions ·
+    Teixeira Barbosa, Robles Cantero, Brizuela Velasco · June 2026 · MIT ·
+    <a href="https://github.com/Tuminha/llm-evaluation-for-dentistry">github.com/Tuminha/llm-evaluation-for-dentistry</a>
   </footer>
 </body>
 </html>
