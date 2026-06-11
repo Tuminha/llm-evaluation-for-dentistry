@@ -95,7 +95,7 @@ python src/run_eval.py --backend anthropic --trials 3   # Claude family
 python src/run_eval.py --backend openai --trials 3       # GPT family (incl. GPT-5.5)
 
 # Custom lineup (keys from src/providers.py ROSTER)
-python src/run_eval.py --models claude-opus-4.8,gpt-5.2,gemini-3.1-pro,llama-4-maverick
+python src/run_eval.py --models claude-opus-4.8,gpt-5.5,gemini-3.1-pro,llama-4-maverick
 ```
 
 Three backends: `--backend openrouter` (default) reaches every provider through one key;
@@ -110,12 +110,12 @@ python src/build_visuals.py
 
 ## The model lineup
 
-Verified available on OpenRouter (2026-06-10). The default lineup — the seven models in the
-results below — spans closed flagships, an efficient tier, and open-weight models:
+Verified available on OpenRouter (lineup as of 2026-06-11). The default lineup — the eight
+models in the results below — spans closed flagships, an efficient tier, and open-weight models:
 
 | Tier | Models |
 |---|---|
-| Flagship | Claude Fable 5, Claude Opus 4.8, GPT-5.2, Gemini 3.1 Pro |
+| Flagship | Claude Fable 5, Claude Opus 4.8, GPT-5.5, GPT-5.2, Gemini 3.1 Pro |
 | Efficient | Qwen3.7 Plus *(plus available: Claude Haiku 4.5, GPT-5 mini, Gemini 2.5 Flash)* |
 | Open-weight | Llama 4 Maverick, DeepSeek V3.2 |
 
@@ -123,27 +123,30 @@ Edit `ROSTER` in [`src/providers.py`](src/providers.py) to add or swap models.
 
 ## Results
 
-> **Cross-provider run — 2026-06-10.** 30 clinician-verified questions × 7 models via
-> OpenRouter, judged by Claude Opus 4.8 with a full GPT-5.2 second-judge pass, 1 trial.
-> Real data, no placeholders; every answer transcript and both judges' verdicts are in
-> [`results/`](results/). W&B: [project](https://wandb.ai/tuminha/dental-llm-benchmark).
+> **Cross-provider run — 2026-06-10/11.** 30 clinician-verified questions × 8 models via
+> OpenRouter, judged by Claude Opus 4.8 with full GPT-5.2 and GPT-5.5 second-judge passes,
+> 1 trial. Real data, no placeholders; every answer transcript and judge verdict is in
+> [`results/`](results/). The repository files are the source of truth.
 
 | Model | Accuracy (95% CI) | Answer rate | Acc. on answered | Mean latency |
 |---|---|---|---|---|
 | GPT-5.2 | **96.7%** [90.0–100] | 100% | 96.7% | 14.8 s |
 | Claude Opus 4.8 | 93.3% [83.3–100] | 100% | 93.3% | 12.1 s |
+| GPT-5.5 | 93.3% [83.3–100] | 100% | 93.3% | 20.1 s |
 | Gemini 3.1 Pro | 90.0% [76.7–100] | 100% | 90.0% | 20.5 s |
 | Qwen3.7 Plus | 83.3% [70.0–96.7] | 100% | 83.3% | 40.8 s |
-| Claude Fable 5 | 80.0% [66.7–93.3] | **83.3%** | **96.0%** | 15.0 s |
+| Claude Fable 5 | 80.0% [66.7–93.3] | **83.3%** | **96.0%** | 16.5 s |
 | DeepSeek V3.2 | 70.0% [53.3–86.7] | 100% | 70.0% | 34.1 s |
 | Llama 4 Maverick | 46.7% [30.0–63.3] | 100% | 46.7% | 25.7 s |
 
 CIs are bootstrap over questions (10k resamples, seed 42). Accuracy counts a refusal as a
-failure (deployment view); "acc. on answered" is the capability view.
+failure (deployment view); "acc. on answered" is the capability view. Reproduce the table
+and judge-agreement metrics with `python src/analysis.py`, which writes
+[`results/analysis_tables.md`](results/analysis_tables.md).
 
 **Key findings**
 
-- **The flagship cluster is statistically tied.** GPT-5.2, Claude Opus 4.8, and Gemini 3.1
+- **The flagship cluster is statistically tied.** GPT-5.2, Claude Opus 4.8, GPT-5.5, and Gemini 3.1
   Pro have heavily overlapping CIs — at n=30, no ranking among them is claimable. The gap
   between that cluster and the open-weight models is real and large.
 - **Claude Fable 5 refused 5 of 30 questions** (perio–diabetes, pregnancy, smoking,
@@ -156,14 +159,15 @@ failure (deployment view); "acc. on answered" is the capability view.
   (MRONJ drugs, endocarditis prophylaxis, anticoagulants) — the domain where a wrong or
   missing answer is most dangerous. DeepSeek V3.2's weak spot is 2017 World Workshop
   staging/grading (40% on diagnosis).
-- **Qwen3.7 Plus is the budget surprise**: 83.3% at $0.40/$1.60 per M tokens — above one
-  flagship on deployment accuracy, at roughly 1/30th of flagship pricing.
-- **Judge bias was measured, not assumed.** A GPT-5.2 second-judge pass over all 205
-  answered rows agreed with Opus 4.8 on 81.0% of verdicts (Cohen's kappa 0.507). GPT-5.2
-  is uniformly harsher — *every* model scores lower under it, **including GPT-5.2 itself**
-  (−13.3 pts, identical to Opus 4.8's delta), and the Anthropic models' deltas sit in the
-  middle of the distribution. That is judge severity, not family favoritism; model ranking
-  is stable under both judges. Full table: [`results/judge_agreement.md`](results/judge_agreement.md).
+- **Qwen3.7 Plus remains the efficient-tier surprise**: 83.3% deployment accuracy, ahead of
+  Fable 5's deployment score because Fable refused clinically relevant questions.
+- **Judge bias was measured, not assumed.** GPT-5.2 and GPT-5.5 independently re-scored the
+  stored answers. GPT-5.2 agreed with Opus 4.8 on 81.7% of verdicts (kappa 0.506) over 235
+  answered rows; GPT-5.5 agreed on 83.8% (kappa 0.524) over the same 235
+  answered rows. Both OpenAI judges are stricter than Opus overall, and GPT-5.5 scores its
+  own answers lower than Opus did (76.7% vs 93.3%). That argues for judge severity rather
+  than simple same-family favoritism. Full tables: [`results/judge_agreement.md`](results/judge_agreement.md)
+  and [`results/judge_agreement_gpt55.md`](results/judge_agreement_gpt55.md).
 - **Run-to-run stability:** the protocol was run twice end-to-end on the original 5-model
   lineup; per-model accuracy shifted by at most one question (e.g. GPT-5.2 93.3→96.7).
 
@@ -183,6 +187,9 @@ Reproduce or extend:
 ```bash
 python src/run_eval.py --backend openrouter --trials 1   # this run
 python src/judge_agreement.py                            # second-judge agreement pass
+python src/judge_agreement.py --judge openai/gpt-5.5 \
+  --outfile results/results_judge_gpt55.jsonl \
+  --report results/judge_agreement_gpt55.md
 python src/run_eval.py --trials 3 --wandb                # add consistency, log to W&B
 ```
 
@@ -200,9 +207,9 @@ legacy/                 # original W&B Weave course notebooks (provenance)
 
 ## Roadmap
 
-- **Done** — GPT-family pilot; full 7-model cross-provider run with answer transcripts
-  (2026-06-10); second-judge agreement pass (GPT-5.2 vs Opus 4.8); refusal detection with
-  per-row provider/finish-reason provenance.
+- **Done** — GPT-family pilot; full 8-model cross-provider run with answer transcripts
+  (2026-06-10/11); second-judge agreement passes (GPT-5.2 and GPT-5.5 vs Opus 4.8);
+  refusal detection with per-row provider/finish-reason provenance.
 - **Next** — expand to ~75–100 questions; ≥3 trials for consistency; per-difficulty
   breakdowns; a third judge for a proper jury.
 - **Later** — publish the validated dataset to Hugging Face under Periospot; quarterly

@@ -171,5 +171,5 @@ wandb/
 # they are the published benchmark data.
 results/*.png
 
-# Unpublished draft material (paper prep) — remove this line if/when the preprint ships
-paper/
+# macOS local metadata
+.DS_Store

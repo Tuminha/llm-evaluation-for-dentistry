@@ -30,6 +30,7 @@ class Model:
 ROSTER: dict[str, Model] = {
     "claude-fable-5":   Model("anthropic/claude-fable-5",         "Claude Fable 5",   "flagship"),
     "claude-opus-4.8":  Model("anthropic/claude-opus-4.8",        "Claude Opus 4.8",  "flagship"),
+    "gpt-5.5":          Model("openai/gpt-5.5",                   "GPT-5.5",          "flagship"),
     "gpt-5.2":          Model("openai/gpt-5.2",                   "GPT-5.2",          "flagship"),
     "gemini-3.1-pro":   Model("google/gemini-3.1-pro-preview",    "Gemini 3.1 Pro",   "flagship"),
     "qwen3.7-plus":     Model("qwen/qwen3.7-plus",                "Qwen3.7 Plus",     "efficient"),
@@ -44,6 +45,7 @@ ROSTER: dict[str, Model] = {
 DEFAULT_LINEUP = [
     "claude-fable-5",
     "claude-opus-4.8",
+    "gpt-5.5",
     "gpt-5.2",
     "gemini-3.1-pro",
     "qwen3.7-plus",

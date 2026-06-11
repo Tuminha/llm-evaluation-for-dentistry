@@ -14,7 +14,7 @@ Resume-safe: completed (model, qid) pairs in the output file are skipped.
 
 Usage:
     python src/judge_agreement.py                 # GPT-5.2 re-judges results.jsonl
-    python src/judge_agreement.py --judge google/gemini-3.1-pro-preview
+    python src/judge_agreement.py --judge google/gemini-3.1-pro-preview --report results/judge_agreement_gemini.md
 """
 from __future__ import annotations
 
@@ -52,6 +52,7 @@ def main() -> None:
     ap.add_argument("--judge", default="openai/gpt-5.2", help="OpenRouter id of the second judge")
     ap.add_argument("--infile", default=str(RESULTS_DIR / "results.jsonl"))
     ap.add_argument("--outfile", default=str(RESULTS_DIR / "results_judge2.jsonl"))
+    ap.add_argument("--report", default=str(RESULTS_DIR / "judge_agreement.md"))
     args = ap.parse_args()
 
     load_dotenv(ROOT / ".env")
@@ -139,7 +140,7 @@ def main() -> None:
             lines.append(f"- {r1['model']} / {r1['qid']} ({r1['domain']}): "
                          f"j1={'✓' if r1['correct'] else '✗'} j2={'✓' if r2['correct'] else '✗'} — {r2['judge_explanation'][:140]}")
 
-    report = RESULTS_DIR / "judge_agreement.md"
+    report = Path(args.report)
     report.write_text("\n".join(lines) + "\n")
     print(f"\nWrote {out_path}")
     print(f"Wrote {report}")

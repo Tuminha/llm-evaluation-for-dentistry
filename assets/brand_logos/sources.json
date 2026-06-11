@@ -1,0 +1,38 @@
+{
+  "openai": {
+    "label": "OpenAI",
+    "url": "https://openai.com/brand/",
+    "kind": "inline_svg",
+    "note": "Inline OpenAI mark from the official OpenAI design guidelines page."
+  },
+  "anthropic": {
+    "label": "Anthropic",
+    "url": "https://cdn.prod.website-files.com/67ce28cfec624e2b733f8a52/67d31dd7aa394792257596c5_webclip.png",
+    "kind": "image",
+    "note": "High-resolution webclip referenced by anthropic.com."
+  },
+  "gemini": {
+    "label": "Google Gemini",
+    "url": "https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg",
+    "kind": "svg",
+    "note": "Gemini sparkle SVG referenced by gemini.google.com."
+  },
+  "qwen": {
+    "label": "Qwen",
+    "url": "https://img.alicdn.com/imgextra/i1/O1CN013ltlI61OTOnTStXfj_!!6000000001706-55-tps-330-327.svg",
+    "kind": "svg",
+    "note": "Qwen SVG referenced by qwen.ai."
+  },
+  "meta": {
+    "label": "Meta",
+    "url": "https://static.xx.fbcdn.net/rsrc.php/yf/r/-7pQO6hUGK_.svg",
+    "kind": "svg",
+    "note": "Meta SVG referenced by about.meta.com brand resources."
+  },
+  "deepseek": {
+    "label": "DeepSeek",
+    "url": "https://www.deepseek.com/favicon.ico",
+    "kind": "image",
+    "note": "Favicon from deepseek.com."
+  }
+}
