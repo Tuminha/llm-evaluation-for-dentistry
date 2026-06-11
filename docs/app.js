@@ -16,6 +16,59 @@ const escapeHtml = (value) => String(value)
   .replaceAll(">", "&gt;")
   .replaceAll('"', "&quot;");
 
+/* ---- scroll-in animation: numbers tick up, bars grow, heat cells fade in.
+   Each container animates once, on first reveal; filter re-renders after that
+   paint final values directly. Reduced-motion users get instant finals. ---- */
+
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const revealedSections = new Set();
+const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+function animateCount(el) {
+  const target = parseFloat(el.dataset.count);
+  const decimals = parseInt(el.dataset.decimals || "0", 10);
+  const suffix = el.dataset.suffix || "";
+  const done = () => { el.textContent = target.toFixed(decimals) + suffix; };
+  if (reduceMotion) { done(); return; }
+  const dur = 700;
+  const start = performance.now();
+  const tick = (now) => {
+    const t = Math.min((now - start) / dur, 1);
+    el.textContent = (target * easeOutCubic(t)).toFixed(decimals) + suffix;
+    if (t < 1) requestAnimationFrame(tick); else done();
+  };
+  requestAnimationFrame(tick);
+}
+
+function revealSection(container) {
+  revealedSections.add(container.id);
+  container.querySelectorAll("[data-count]").forEach(animateCount);
+  container.querySelectorAll(".bar-fill[data-w]").forEach((bar, i) => {
+    bar.style.transitionDelay = reduceMotion ? "0ms" : `${Math.min(i * 60, 420)}ms`;
+    bar.style.width = `${bar.dataset.w}%`;
+  });
+  container.querySelectorAll(".heat").forEach((cell, i) => {
+    cell.style.transitionDelay = reduceMotion ? "0ms" : `${Math.min(i * 14, 600)}ms`;
+    cell.classList.add("is-in");
+  });
+}
+
+const sectionObserver = ("IntersectionObserver" in window && !reduceMotion)
+  ? new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        sectionObserver.unobserve(entry.target);
+        revealSection(entry.target);
+      });
+    }, { threshold: 0.2 })
+  : null;
+
+function armSection(container) {
+  if (!container || revealedSections.has(container.id)) return;
+  if (!sectionObserver) { revealSection(container); return; }
+  sectionObserver.observe(container);
+}
+
 function init() {
   byId("dataCommit").textContent = data.meta.data_commit.slice(0, 7);
   renderHeroFigure();
@@ -62,10 +115,11 @@ function renderMetrics() {
   ];
   byId("metricGrid").innerHTML = items.map(([value, label]) => `
     <div class="metric">
-      <strong>${value}</strong>
+      <strong data-count="${value}">0</strong>
       <span>${label}</span>
     </div>
   `).join("");
+  armSection(byId("metricGrid"));
 }
 
 function buildControls() {
@@ -142,7 +196,7 @@ function renderLeaderboard() {
         </span>
       </span>
       <span class="bar-track" aria-hidden="true">
-        <span class="bar-fill" style="width:${model.viewAccuracy}%; background:${model.color}"></span>
+        <span class="bar-fill" data-w="${model.viewAccuracy}" style="width:${revealedSections.has("leaderboardRows") ? model.viewAccuracy : 0}%; background:${model.color}"></span>
       </span>
       <span class="score">
         <strong>${fmtPct(model.viewAccuracy)}</strong>
@@ -157,6 +211,7 @@ function renderLeaderboard() {
       renderModelDetail();
     });
   });
+  armSection(byId("leaderboardRows"));
 }
 
 function selectedModel() {
@@ -187,11 +242,12 @@ function renderModelDetail() {
 
 function renderMatrix() {
   const headers = data.domains.map((domain) => `<th>${escapeHtml(domain.label)}</th>`).join("");
+  const revealed = revealedSections.has("domainMatrix");
   const rows = data.models.map((model) => {
     const cells = data.domains.map((domain) => {
       const cell = model.domains[domain.id];
       const color = heatColor(cell.accuracy);
-      return `<td><span class="heat" style="display:block; padding:9px; background:${color}">${cell.accuracy.toFixed(0)}</span></td>`;
+      return `<td><span class="heat ${revealed ? "is-in" : ""}" style="display:block; padding:9px; background:${color}">${cell.accuracy.toFixed(0)}</span></td>`;
     }).join("");
     return `
       <tr>
@@ -206,6 +262,7 @@ function renderMatrix() {
       <tbody>${rows}</tbody>
     </table>
   `;
+  armSection(byId("domainMatrix"));
 }
 
 // Functional data ramp mirroring tokens.css --color-ok / --color-warn / --color-bad.
@@ -254,16 +311,17 @@ function renderErrors() {
   const maxRows = Math.max(...data.error_analysis.categories.map((category) => category.rows));
   byId("errorCategories").innerHTML = data.error_analysis.categories.map((category) => `
     <div class="error-item">
-      <div class="error-count">${category.rows}</div>
+      <div class="error-count" data-count="${category.rows}">0</div>
       <div>
         <strong>${escapeHtml(category.name)}</strong>
         <p>${escapeHtml(category.summary)}</p>
         <div class="bar-track" aria-hidden="true">
-          <div class="bar-fill" style="width:${(category.rows / maxRows) * 100}%; background:#0f8f83"></div>
+          <div class="bar-fill" data-w="${(category.rows / maxRows) * 100}" style="width:0%; background:#2e7d6f"></div>
         </div>
       </div>
     </div>
   `).join("");
+  armSection(byId("errorCategories"));
 
   byId("judgeFlags").innerHTML = data.error_analysis.internal_candidates.map((flag) => `
     <div class="flag-row">
@@ -277,10 +335,11 @@ function renderJudges() {
   byId("judgeCards").innerHTML = data.judge_agreement.map((judge) => `
     <div class="judge-card">
       <span class="chip">${escapeHtml(judge.judge)}</span>
-      <strong>${fmtPct(judge.agreement)}</strong>
+      <strong data-count="${judge.agreement.toFixed(1)}" data-decimals="1" data-suffix="%">0%</strong>
       <span>${judge.paired} paired answered rows; Cohen's kappa ${judge.kappa.toFixed(3)}</span>
     </div>
   `).join("");
+  armSection(byId("judgeCards"));
 
   const judges = data.judge_agreement;
   const models = data.models.map((model) => model.model);

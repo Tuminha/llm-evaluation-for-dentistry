@@ -377,7 +377,12 @@ select:disabled, input:disabled { opacity: 0.5; cursor: not-allowed; }
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   color: #fff;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 360ms var(--ease-out), transform 360ms var(--ease-out);
 }
+
+.heat.is-in { opacity: 1; transform: none; }
 
 /* ---------- question explorer ---------- */
 
@@ -644,5 +649,6 @@ pre {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .bar-fill { transition: none; }
+  .heat { opacity: 1; transform: none; transition: none; }
   .cta-chip, .leader-row, .resource-list a, .copy-btn { transition: none; }
 }
