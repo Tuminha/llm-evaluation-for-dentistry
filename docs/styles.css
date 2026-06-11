@@ -42,6 +42,20 @@ a:hover { text-decoration-color: var(--color-accent); color: var(--color-accent)
 
 .skip-link:focus-visible { top: var(--space-sm); color: var(--color-paper); }
 
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 60;
+  background: var(--color-accent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+.hero-figure { will-change: transform, opacity; }
+
 /* ---------- N9 masthead: wordmark left, one action right ---------- */
 
 .masthead {
@@ -523,7 +537,17 @@ select:disabled, input:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ---------- infographic + resources ---------- */
 
-.infographic { display: block; width: 100%; height: auto; border: var(--rule-hairline); }
+.infographic {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: var(--rule-hairline);
+  opacity: 0;
+  transform: translateY(16px) scale(0.97);
+  transition: opacity 640ms var(--ease-out), transform 640ms var(--ease-out);
+}
+
+.infographic.is-in { opacity: 1; transform: none; }
 
 .reproduce {
   display: grid;
@@ -650,5 +674,7 @@ pre {
   html { scroll-behavior: auto; }
   .bar-fill { transition: none; }
   .heat { opacity: 1; transform: none; transition: none; }
+  .infographic { opacity: 1; transform: none; transition: none; }
+  .scroll-progress { display: none; }
   .cta-chip, .leader-row, .resource-list a, .copy-btn { transition: none; }
 }

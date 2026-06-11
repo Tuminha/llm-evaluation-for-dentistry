@@ -42,6 +42,7 @@ function animateCount(el) {
 
 function revealSection(container) {
   revealedSections.add(container.id);
+  container.querySelectorAll(".infographic").forEach((img) => img.classList.add("is-in"));
   container.querySelectorAll("[data-count]").forEach(animateCount);
   container.querySelectorAll(".bar-fill[data-w]").forEach((bar, i) => {
     bar.style.transitionDelay = reduceMotion ? "0ms" : `${Math.min(i * 60, 420)}ms`;
@@ -69,12 +70,39 @@ function armSection(container) {
   sectionObserver.observe(container);
 }
 
+function initScrollEffects() {
+  // One passive rAF handler drives both: the reading-progress hairline and a
+  // slow editorial drift on the hero figure (depth, not decoration). The drift
+  // is desktop-only; mobile scroll keeps its own physics.
+  const progress = byId("scrollProgress");
+  const figure = document.querySelector(".hero-figure");
+  const drift = !reduceMotion && window.matchMedia("(min-width: 60rem)").matches;
+  if (reduceMotion) return;
+  let ticking = false;
+  const apply = () => {
+    ticking = false;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    if (progress && max > 0) progress.style.transform = `scaleX(${Math.min(window.scrollY / max, 1)})`;
+    if (figure && drift) {
+      const yv = Math.min(window.scrollY, 820);
+      figure.style.transform = `translateY(${(yv * 0.22).toFixed(1)}px)`;
+      figure.style.opacity = Math.max(1 - yv / 760, 0).toFixed(3);
+    }
+  };
+  window.addEventListener("scroll", () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(apply); }
+  }, { passive: true });
+  apply();
+}
+
 function init() {
   byId("dataCommit").textContent = data.meta.data_commit.slice(0, 7);
   renderHeroFigure();
   renderMetrics();
   buildControls();
   renderAll();
+  armSection(byId("infographic"));
+  initScrollEffects();
   byId("questionSearch").addEventListener("input", (event) => {
     state.query = event.target.value.trim().toLowerCase();
     renderQuestions();
