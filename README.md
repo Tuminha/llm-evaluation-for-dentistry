@@ -7,9 +7,23 @@
 ![Tracking](https://img.shields.io/badge/tracking-Weights%20%26%20Biases-E0A458.svg)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20647357.svg)](https://doi.org/10.5281/zenodo.20647357)
 
-A reproducible benchmark that measures how well current large language models answer
-**clinical dental questions** — across periodontics, implants, oral-systemic medicine,
-pharmacology, and patient communication.
+A reproducible benchmark comparing **eight language models on 30 clinician-reviewed dental
+questions** across periodontics, implants, oral-systemic medicine, pharmacology, and patient
+communication. Candidate answers are graded against explicit clinical rubrics with an LLM-as-
+judge pipeline, and the stored answers can be re-scored by independent judges without rerunning
+the contestant models.
+
+## Contents
+
+- [Project overview](#why-this-exists)
+- [Evaluation dataset and data structure](#evaluation-dataset-and-data-structure)
+- [Evaluation methodology](#evaluation-methodology)
+- [Setup and installation](#setup-and-installation)
+- [Run the evaluation](#run-the-evaluation)
+- [Model lineup](#model-lineup)
+- [Results](#results)
+- [Reproducibility and known sensitivities](#reproducibility-and-known-sensitivities)
+- [Repository layout](#repository-layout)
 
 ## Read the report
 
@@ -32,14 +46,27 @@ This repo is that missing benchmark: a periodontist-authored question set with e
 scoring rubrics, run across every major model through a single gateway, scored the same way
 every time.
 
-## The dataset
+## Evaluation dataset and data structure
 
 30 questions across 6 clinical domains, each with a difficulty level and a rubric that
 defines what a correct answer must include — and the errors it must avoid.
 
 ![Dataset composition](assets/dataset_composition.png)
 
-Each question looks like this:
+The dataset is stored in [`data/dental_qa.json`](data/dental_qa.json) as an object with a
+`metadata` block and a `questions` array. Each question contains:
+
+| Field | Meaning |
+|---|---|
+| `id` | Stable question identifier, such as `pharm-03` |
+| `domain` | One of six clinical domains, with five questions per domain |
+| `difficulty` | `basic`, `intermediate`, or `advanced` |
+| `question` | The prompt sent to each contestant model |
+| `rubric.must_include` | Required clinical points; all must be satisfied for a correct verdict |
+| `rubric.must_avoid` | Disqualifying errors or unsafe claims |
+| `key_references` | Guideline or literature sources used to validate the rubric |
+
+Example question:
 
 ```json
 {
@@ -62,17 +89,26 @@ Each question looks like this:
 > (pharm-02 made jurisdiction-aware, diag-02 confirmed, the 20 conceptual items reviewed clean).
 > Full record: [`VALIDATION.md`](VALIDATION.md). Dataset: [`data/dental_qa.json`](data/dental_qa.json).
 
-## How scoring works
+## Evaluation methodology
 
 ![Benchmark pipeline](assets/pipeline.svg)
 
-1. **Generation** — every model answers every question through [OpenRouter](https://openrouter.ai)
-   (one API key reaches all of them, and the network path is identical, so latency is comparable).
-2. **Judging** — an LLM judge grades each answer against the question's rubric: it counts how
-   many `must_include` criteria are satisfied and flags any `must_avoid` violations. An answer
-   is correct only if it satisfies **all** required criteria and commits **no** violations.
-3. **Consistency** — each question is asked N times; we measure how much the answers drift.
-4. **Latency** — wall-clock time per call is recorded for every request.
+1. **Question set** — 30 clinician-reviewed, guideline-verified questions cover six domains
+   with five questions per domain and a mix of basic, intermediate, and advanced difficulty.
+2. **Contestant models** — the published run evaluates Claude Fable 5, Claude Opus 4.8,
+   GPT-5.5, GPT-5.2, Gemini 3.1 Pro, Qwen3.7 Plus, Llama 4 Maverick, and DeepSeek V3.2.
+3. **Generation** — each model receives the same question without retrieval-augmented context.
+   The published cross-provider run uses [OpenRouter](https://openrouter.ai), keeping one gateway
+   and network path for all contestant calls.
+4. **Primary judging** — Claude Opus 4.8 grades the first stored answer against the question's
+   explicit rubric. It counts satisfied `must_include` criteria and flags `must_avoid`
+   violations. A response is correct only if it satisfies **all** required criteria and commits
+   **no** disqualifying violation.
+5. **Secondary judging** — the exact stored answers are independently re-scored by GPT-5.2 and
+   GPT-5.5. The repository reports verdict agreement, Cohen's kappa, per-model score changes,
+   and every disagreement row.
+6. **Additional measures** — the runner records wall-clock latency, provider metadata, finish
+   reason, refusals, and (when `--trials` is greater than 1) a lexical consistency score.
 
 The judge is configurable (`--judge`), and judge bias is **measured, not assumed**: every
 stored answer is re-scored by an independent second judge from a different vendor
@@ -82,7 +118,14 @@ Refusals (a model declining to answer) are recorded as their own category — sc
 for deployment-view accuracy, but labeled per row so answer-rate and accuracy-on-answered
 can be reported separately.
 
-## Quickstart
+## Setup and installation
+
+### Requirements
+
+- Python 3.10 or newer
+- One provider key: `OPENROUTER_API_KEY` for the full cross-provider benchmark,
+  `OPENAI_API_KEY` for a GPT-only pilot, or `ANTHROPIC_API_KEY` for a Claude-only pilot
+- Optional: Weights & Biases credentials when using `--wandb`
 
 ```bash
 git clone https://github.com/Tuminha/llm-evaluation-for-dentistry.git
@@ -91,6 +134,14 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env          # then add your OPENROUTER_API_KEY
 ```
+
+The runner loads `.env` automatically, and `.env` is gitignored. Never commit API keys.
+
+## Run the evaluation
+
+The benchmark is resume-safe: completed `(model, question)` pairs already present in
+`results/results.jsonl` are skipped. To start an entirely new run, first move or rename the
+existing results file so published transcripts are not mixed with new outputs.
 
 ```bash
 # Cheap sanity check — 3 questions, 1 trial, default lineup
@@ -117,7 +168,22 @@ You don't need an API key to regenerate the dataset chart:
 python src/build_visuals.py
 ```
 
-## The model lineup
+### Re-score stored answers and rebuild analysis tables
+
+```bash
+# Re-score the published answers with the default independent judge (GPT-5.2)
+python src/judge_agreement.py
+
+# Rebuild confidence intervals and judge-agreement tables from committed JSONL files
+python src/analysis.py
+```
+
+Primary outputs are append-only JSONL transcripts in `results/`, plus Markdown summaries and
+charts. Each primary row includes the model and model ID, question metadata, answer text,
+rubric verdict, latency, provider, finish reason, and all trial answers when multiple trials are
+requested.
+
+## Model lineup
 
 Verified available on OpenRouter (lineup as of 2026-06-11). The default lineup — the eight
 models in the results below — spans closed flagships, an efficient tier, and open-weight models:
@@ -189,14 +255,15 @@ and judge-agreement metrics with `python src/analysis.py`, which writes
 
 ![Accuracy by model and clinical domain](assets/accuracy_by_domain.png)
 
-**Caveats — read before citing.** n=30 means wide CIs — treat small gaps as noise; **1 trial**
-per question (temperature 0; the consistency metric needs `--trials 3`); questions and rubrics
-were authored and validated by **one periodontist** (guideline-verified:
-[`VALIDATION.md`](VALIDATION.md)); absolute accuracy is **judge-dependent** (moderate
-inter-judge agreement — ranks are stable, levels are not); latency reflects one gateway
-(OpenRouter) on one day.
+## Reproducibility and known sensitivities
 
-Reproduce or extend:
+The committed benchmark snapshot is **30 questions × 8 models × 1 trial**, generated through
+OpenRouter on June 10–11, 2026. Candidate temperature is set to `0.0` on the OpenRouter path,
+and analysis confidence intervals use 10,000 bootstrap resamples over questions with seed 42.
+The raw candidate answers and judge verdicts are committed, so analyses and second-judge passes
+can be reproduced without paying to regenerate contestant answers.
+
+Reproduce the published configuration or extend it:
 
 ```bash
 python src/run_eval.py --backend openrouter --trials 1   # this run
@@ -207,7 +274,28 @@ python src/judge_agreement.py --judge openai/gpt-5.5 \
 python src/run_eval.py --trials 3 --wandb                # add consistency, log to W&B
 ```
 
-## Repo layout
+Known sensitivities that should be reported with any derived ranking:
+
+- **Judge criteria and severity affect scores.** Opus 4.8, GPT-5.2, and GPT-5.5 disagree on a
+  meaningful minority of answered rows (moderate kappa). Changing the rubric wording, judge
+  prompt, judge model, or pass/fail threshold can change absolute scores and some ordering.
+- **Small sample uncertainty is substantial.** With only 30 questions, the leading models have
+  overlapping confidence intervals; small point differences should not be presented as a
+  definitive rank order.
+- **Single-trial results do not measure generation variance.** Use `--trials 3` or more for the
+  consistency metric. The current consistency score is lexical Jaccard overlap, not semantic
+  equivalence.
+- **Refusal handling changes the interpretation.** Deployment accuracy counts refusals as
+  incorrect; `accuracy on answered` separates capability from answer rate.
+- **Serving conditions can drift.** Provider routing, model aliases, model revisions, safety
+  behavior, latency, and availability can change after the published run. Record dates, exact
+  model IDs, backend, and output files for every replication.
+- **Clinical validation is not multi-rater validation.** The questions and rubrics were authored
+  and validated by one periodontist against the sources documented in [`VALIDATION.md`](VALIDATION.md).
+- **Dependencies are not lockfile-pinned.** For archival replication, record the Python version,
+  installed package versions, repository commit SHA, and environment metadata alongside results.
+
+## Repository layout
 
 ```
 data/dental_qa.json     # the benchmark dataset
@@ -216,6 +304,8 @@ src/scorers.py          # LLM-judge + consistency scoring
 src/run_eval.py         # CLI runner -> results/ + charts
 src/build_visuals.py    # charts (dataset chart needs no API key)
 src/build_pages.py      # interactive GitHub Pages report + infographic
+results/                # raw transcripts, summaries, judge agreement, and error analysis
+paper/                  # manuscript source, PDF, figures, and arXiv upload package
 docs/                   # static interactive report for GitHub Pages
 assets/                 # committed README visuals
 legacy/                 # original W&B Weave course notebooks (provenance)
